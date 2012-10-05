@@ -1,5 +1,5 @@
 --TEST--
-Check the haversine function usage.
+Check the haversine function returns the correct distance between London and Edinburgh.
 --SKIPIF--
 <?php if (!extension_loaded("geospatial")) print "skip"; ?>
 --FILE--
@@ -34,6 +34,5 @@ echo haversine(51.5171, 0.1062, 55.9500, 3.2200);
 */
 ?>
 --EXPECT--
-534.237028
-
+534.23703599421
 
