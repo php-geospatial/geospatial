@@ -32,6 +32,7 @@ ZEND_BEGIN_ARG_INFO(haversine_args,ZEND_SEND_BY_VAL)
 	ZEND_ARG_INFO(0,fromLongitude)
 	ZEND_ARG_INFO(0,toLatitude)
 	ZEND_ARG_INFO(0,toLongitude)
+	ZEND_ARG_INFO(0,radius)
 ZEND_END_ARG_INFO()
 
 /* {{{ geospatial_functions[]
@@ -100,8 +101,8 @@ PHP_MINFO_FUNCTION(geospatial)
 PHP_FUNCTION(haversine)
 {
 	double fromLat, fromLong, toLat, toLong, deltaLat, deltaLong;
-	double latH, longH, result;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd", &fromLat, &fromLong, &toLat, &toLong) == FAILURE) {
+	double radius = GEO_EARTH_RADIUS, latH, longH, result;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd|d", &fromLat, &fromLong, &toLat, &toLong, &radius) == FAILURE) {
 		return;
 	}
 
@@ -114,7 +115,7 @@ PHP_FUNCTION(haversine)
 	longH *= longH;
 
 	result = cos(fromLat * GEO_DEG_TO_RAD) * cos(toLat * GEO_DEG_TO_RAD);
-	result = GEO_EARTH_RADIUS_IN_METERS * 2.0 * asin(sqrt(latH + result * longH));
+	result = radius * 2.0 * asin(sqrt(latH + result * longH));
 	RETURN_DOUBLE(result);
 }
 

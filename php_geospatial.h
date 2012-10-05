@@ -41,7 +41,7 @@ extern zend_module_entry geospatial_module_entry;
  * Calculate the radius using WGS-84's equatorial radius of
  * 6378137m
  */
-#define GEO_EARTH_RADIUS_IN_METERS 6378.137
+#define GEO_EARTH_RADIUS 6378.137
 
 PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
