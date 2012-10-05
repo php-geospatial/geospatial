@@ -39,8 +39,8 @@ ZEND_END_ARG_INFO()
  * Every user visible function must have an entry in geospatial_functions[].
  */
 const zend_function_entry geospatial_functions[] = {
-	PHP_FE(haversine, haversine_args)		/* For testing, remove later. */
-	PHP_FE_END	/* Must be the last line in geospatial_functions[] */
+	PHP_FE(haversine, haversine_args)
+	{ NULL, NULL, NULL }
 };
 /* }}} */
 
