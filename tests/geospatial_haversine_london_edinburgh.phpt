@@ -28,7 +28,8 @@ echo haversine(51.5171, 0.1062, 55.9500, 3.2200);
   return 
 
 	Accept defined (equatorial) Earth Radius in km (which is based on WGS-84):
-	- 6378137m (at the equator).
+	- 6,378,1370m (at the equator).
+	- 6,356,7523m (at the equator).
 
 	Sanity check - expected distance: approx 534km.
 */

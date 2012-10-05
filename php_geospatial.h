@@ -39,7 +39,7 @@ extern zend_module_entry geospatial_module_entry;
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
  * Calculate the radius using WGS-84's equatorial radius of
- * 6378137m
+ * 6,378,1370m
  */
 #define GEO_EARTH_RADIUS 6378.137
 
