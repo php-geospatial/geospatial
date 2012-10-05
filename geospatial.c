@@ -27,19 +27,19 @@
 #include "ext/standard/info.h"
 #include "php_geospatial.h"
 
-/* If you declare any globals in php_geospatial.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(geospatial)
-*/
-
-/* True global resources - no need for thread safety here */
-static int le_geospatial;
+ZEND_BEGIN_ARG_INFO(haversine_args,ZEND_SEND_BY_VAL)
+	ZEND_ARG_INFO(0,fromLatitude)
+	ZEND_ARG_INFO(0,fromLongitude)
+	ZEND_ARG_INFO(0,toLatitude)
+	ZEND_ARG_INFO(0,toLongitude)
+ZEND_END_ARG_INFO()
 
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
  */
 const zend_function_entry geospatial_functions[] = {
-	PHP_FE(confirm_geospatial_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(haversine, haversine_args)		/* For testing, remove later. */
 	PHP_FE_END	/* Must be the last line in geospatial_functions[] */
 };
 /* }}} */
@@ -53,9 +53,9 @@ zend_module_entry geospatial_module_entry = {
 	"geospatial",
 	geospatial_functions,
 	PHP_MINIT(geospatial),
-	PHP_MSHUTDOWN(geospatial),
-	PHP_RINIT(geospatial),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(geospatial),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
+	NULL,
 	PHP_MINFO(geospatial),
 #if ZEND_MODULE_API_NO >= 20010901
 	"0.1", /* Replace with version number for your extension */
@@ -68,34 +68,10 @@ zend_module_entry geospatial_module_entry = {
 ZEND_GET_MODULE(geospatial)
 #endif
 
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("geospatial.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_geospatial_globals, geospatial_globals)
-    STD_PHP_INI_ENTRY("geospatial.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_geospatial_globals, geospatial_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
-/* {{{ php_geospatial_init_globals
- */
-/* Uncomment this function if you have INI entries
-static void php_geospatial_init_globals(zend_geospatial_globals *geospatial_globals)
-{
-	geospatial_globals->global_value = 0;
-	geospatial_globals->global_string = NULL;
-}
-*/
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(geospatial)
 {
-	/* If you have INI entries, uncomment these lines 
-	REGISTER_INI_ENTRIES();
-	*/
 	return SUCCESS;
 }
 /* }}} */
@@ -103,27 +79,6 @@ PHP_MINIT_FUNCTION(geospatial)
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(geospatial)
-{
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(geospatial)
-{
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(geospatial)
 {
 	return SUCCESS;
 }
@@ -134,43 +89,32 @@ PHP_RSHUTDOWN_FUNCTION(geospatial)
 PHP_MINFO_FUNCTION(geospatial)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "geospatial support", "enabled");
+	php_info_print_table_header(2, "Geospatial functions", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
 
-/* Remove the following function when you have succesfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_geospatial_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_geospatial_compiled)
+PHP_FUNCTION(haversine)
 {
-	char *arg = NULL;
-	int arg_len, len;
-	char *strg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	double fromLat, fromLong, toLat, toLong, deltaLat, deltaLong;
+	double latH, longH, result;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd", &fromLat, &fromLong, &toLat, &toLong) == FAILURE) {
 		return;
 	}
 
-	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "geospatial", arg);
-	RETURN_STRINGL(strg, len, 0);
-}
-/* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
-   follow this convention for the convenience of others editing your code.
-*/
+	deltaLat = (fromLat - toLat) * GEO_DEG_TO_RAD;
+	deltaLong = (fromLong - toLong) * GEO_DEG_TO_RAD;
 
+	latH = sin(deltaLat * 0.5);
+	latH *= latH;
+	longH = sin(deltaLong * 0.5);
+	longH *= longH;
+
+	result = cos(fromLat * GEO_DEG_TO_RAD) * cos(toLat * GEO_DEG_TO_RAD);
+	result = GEO_EARTH_RADIUS_IN_METERS * 2.0 * asin(sqrt(latH + result * longH));
+	RETURN_DOUBLE(result);
+}
 
 /*
  * Local variables:

@@ -36,42 +36,15 @@ extern zend_module_entry geospatial_module_entry;
 #include "TSRM.h"
 #endif
 
+#define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
+#define GEO_EARTH_RADIUS_IN_METERS 6372.797560856
+
 PHP_MINIT_FUNCTION(geospatial);
-PHP_MSHUTDOWN_FUNCTION(geospatial);
-PHP_RINIT_FUNCTION(geospatial);
-PHP_RSHUTDOWN_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
-PHP_FUNCTION(confirm_geospatial_compiled);	/* For testing, remove later. */
-
-/* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
-
-ZEND_BEGIN_MODULE_GLOBALS(geospatial)
-	long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(geospatial)
-*/
-
-/* In every utility function you add that needs to use variables 
-   in php_geospatial_globals, call TSRMLS_FETCH(); after declaring other 
-   variables used by that function, or better yet, pass in TSRMLS_CC
-   after the last function argument and declare your utility function
-   with TSRMLS_DC after the last declared argument.  Always refer to
-   the globals in your function as GEOSPATIAL_G(variable).  You are 
-   encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
-
-#ifdef ZTS
-#define GEOSPATIAL_G(v) TSRMG(geospatial_globals_id, zend_geospatial_globals *, v)
-#else
-#define GEOSPATIAL_G(v) (geospatial_globals.v)
-#endif
+PHP_FUNCTION(haversine);
 
 #endif	/* PHP_GEOSPATIAL_H */
-
 
 /*
  * Local variables:

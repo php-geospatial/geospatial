@@ -13,9 +13,8 @@ dnl [  --with-geospatial             Include geospatial support])
 
 dnl Otherwise use enable:
 
-dnl PHP_ARG_ENABLE(geospatial, whether to enable geospatial support,
-dnl Make sure that the comment is aligned:
-dnl [  --enable-geospatial           Enable geospatial support])
+PHP_ARG_ENABLE(geospatial, whether to enable geospatial support,
+[  --enable-geospatial           Enable geospatial support])
 
 if test "$PHP_GEOSPATIAL" != "no"; then
   dnl Write more examples of tests here...
