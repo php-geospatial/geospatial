@@ -27,12 +27,12 @@
 #include "ext/standard/info.h"
 #include "php_geospatial.h"
 
-ZEND_BEGIN_ARG_INFO(haversine_args,ZEND_SEND_BY_VAL)
-	ZEND_ARG_INFO(0,fromLatitude)
-	ZEND_ARG_INFO(0,fromLongitude)
-	ZEND_ARG_INFO(0,toLatitude)
-	ZEND_ARG_INFO(0,toLongitude)
-	ZEND_ARG_INFO(0,radius)
+ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 4)
+	ZEND_ARG_INFO(0, fromLatitude)
+	ZEND_ARG_INFO(0, fromLongitude)
+	ZEND_ARG_INFO(0, toLatitude)
+	ZEND_ARG_INFO(0, toLongitude)
+	ZEND_ARG_INFO(0, radius)
 ZEND_END_ARG_INFO()
 
 /* {{{ geospatial_functions[]
@@ -97,7 +97,8 @@ PHP_MINFO_FUNCTION(geospatial)
 }
 /* }}} */
 
-
+/* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])
+ * Calculates the greater circle distance between the two lattitude/longitude pairs */
 PHP_FUNCTION(haversine)
 {
 	double fromLat, fromLong, toLat, toLong, deltaLat, deltaLong;
@@ -118,6 +119,7 @@ PHP_FUNCTION(haversine)
 	result = radius * 2.0 * asin(sqrt(latH + result * longH));
 	RETURN_DOUBLE(result);
 }
+/* }}} */
 
 /*
  * Local variables:
