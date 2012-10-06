@@ -2,6 +2,8 @@
 Check the haversine function returns the correct distance between the North and South poles, using a custom radius.
 --SKIPIF--
 <?php if (!extension_loaded("geospatial")) print "skip"; ?>
+--INI--
+precision=14
 --FILE--
 <?php 
 echo haversine(90, 0, -90, 0, 6356.7523);
