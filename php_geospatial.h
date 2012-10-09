@@ -43,10 +43,25 @@ extern zend_module_entry geospatial_module_entry;
  */
 #define GEO_EARTH_RADIUS 6378.137
 
+#define AIRY_1830_A 6377563.396
+#define AIRY_1830_B 6356256.910
+
+#define WGS84_OSGB36_X -446.448;
+#define WGS84_OSGB36_Y 125.157;
+#define WGS84_OSGB36_Z -542.060;
+
+#define SCALE_CHANGE 1.0000204894;
+
+#define ROTATION_X -0.1502;
+#define ROTATION_Y -0.2470;
+#define ROTATION_Z -0.8421;
+
+
 PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
 PHP_FUNCTION(haversine);
+PHP_FUNCTION(helmert);
 
 #endif	/* PHP_GEOSPATIAL_H */
 

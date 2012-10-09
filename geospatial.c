@@ -35,12 +35,20 @@ ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 4)
 	ZEND_ARG_INFO(0, radius)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(helmert_args, 0, 0, 3)
+    ZEND_ARG_INFO(0, x)
+    ZEND_ARG_INFO(0, y)
+    ZEND_ARG_INFO(0, z)
+ZEND_END_ARG_INFO()
+
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
  */
 const zend_function_entry geospatial_functions[] = {
-	PHP_FE(haversine, haversine_args)
+    PHP_FE(haversine, haversine_args)
+	PHP_FE(helmert, helmert_args)
+    /* End of functions */
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -96,6 +104,46 @@ PHP_MINFO_FUNCTION(geospatial)
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_FUNCTION(helmert)
+{
+    double x, y, z;
+    double xOut, yOut, zOut;
+    double rX, rY, rZ;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd", &x, &y, &z) == FAILURE) {
+        return;
+    }
+
+    array_init(return_value);
+    rX = ROTATION_X;
+    rX /= 3600;
+    rX *= GEO_DEG_TO_RAD;
+
+    rY = ROTATION_Y;
+    rY /= 3600;
+    rY *= GEO_DEG_TO_RAD;
+
+    rZ = ROTATION_Z;
+    rZ /= 3600;
+    rZ *= GEO_DEG_TO_RAD;
+
+    xOut = x - (rZ * y) + (rY * z);
+    xOut *= SCALE_CHANGE;
+    xOut += WGS84_OSGB36_X;
+
+    yOut = (rZ * x) + y - (rX * z);
+    yOut *= SCALE_CHANGE;
+    yOut += WGS84_OSGB36_Y;
+
+    zOut = (-rY * x) + (rX * y) + z;
+    zOut *= SCALE_CHANGE;
+    zOut += WGS84_OSGB36_Z;
+
+    add_next_index_double(return_value, xOut);
+    add_next_index_double(return_value, yOut);
+    add_next_index_double(return_value, zOut);
+}
 
 /* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])
  * Calculates the greater circle distance between the two lattitude/longitude pairs */
