@@ -41,6 +41,17 @@ ZEND_BEGIN_ARG_INFO_EX(helmert_args, 0, 0, 3)
     ZEND_ARG_INFO(0, z)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(polar_to_cartesian_args, 0, 0, 2)
+    ZEND_ARG_INFO(0, latitude)
+    ZEND_ARG_INFO(0, longitude)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 3)
+    ZEND_ARG_INFO(0, x)
+    ZEND_ARG_INFO(0, y)
+    ZEND_ARG_INFO(0, z)
+ZEND_END_ARG_INFO()
+
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
@@ -48,6 +59,8 @@ ZEND_END_ARG_INFO()
 const zend_function_entry geospatial_functions[] = {
     PHP_FE(haversine, haversine_args)
 	PHP_FE(helmert, helmert_args)
+    PHP_FE(polar_to_cartesian, polar_to_cartesian_args)
+    PHP_FE(cartesian_to_polar, cartesian_to_polar_args)
     /* End of functions */
 	{ NULL, NULL, NULL }
 };
@@ -143,6 +156,61 @@ PHP_FUNCTION(helmert)
     add_next_index_double(return_value, xOut);
     add_next_index_double(return_value, yOut);
     add_next_index_double(return_value, zOut);
+}
+
+PHP_FUNCTION(polar_to_cartesian)
+{
+    double latitude, longitude;
+    double x, y, z;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd", &latitude, &longitude) == FAILURE) {
+        return;
+    }
+
+    array_init(return_value);
+    double phi = latitude * GEO_DEG_TO_RAD;
+    double lambda = longitude * GEO_DEG_TO_RAD;
+    double eSq = ((AIRY_1830_A * AIRY_1830_A)  - (AIRY_1830_B * AIRY_1830_B))  /  (AIRY_1830_A * AIRY_1830_A);
+    double nu = AIRY_1830_A / sqrt(1 - (eSq * sin(phi) * sin(phi)));
+    x = nu + HEIGHT;
+    x *= cos(phi) * cos(lambda);
+    y = nu + HEIGHT;
+    y *= cos(phi) * sin(lambda);
+    z = ((1 - eSq) * nu) + HEIGHT;
+    z*= sin(phi);
+    add_next_index_double(return_value, x);
+    add_next_index_double(return_value, y);
+    add_next_index_double(return_value, z);
+
+}
+
+PHP_FUNCTION(cartesian_to_polar)
+{
+    double latitude, longitude;
+    double x, y, z;
+    double nu, lambda, h;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd", &x, &y, &z) == FAILURE) {
+        return;
+    }
+    //aiming for 1m accuracy
+    double precision = 0.1 / AIRY_1830_A;
+    array_init(return_value);
+    double eSq = ((AIRY_1830_A * AIRY_1830_A)  - (AIRY_1830_B * AIRY_1830_B))  /  (AIRY_1830_A * AIRY_1830_A);
+    double p = sqrt(x * x + y * y);
+    double phi = atan2(z, p * (1 - eSq));
+    double phiP = 2 * M_PI;
+    while (abs(phi - phiP) > precision) {
+        nu = AIRY_1830_A / sqrt(1 - eSq * sin(phi) * sin(phi));
+        phiP = phi;
+        phi = atan2(z + eSq * nu * sin(phi), p);
+    }
+    lambda = atan2(y ,x);
+    h = p / cos(phi) - nu;
+
+    add_assoc_double(return_value, "lat", phi / GEO_DEG_TO_RAD);
+    add_assoc_double(return_value, "long", lambda / GEO_DEG_TO_RAD);
+    add_assoc_double(return_value, "height", h);
+
 }
 
 /* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])

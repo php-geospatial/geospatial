@@ -56,12 +56,16 @@ extern zend_module_entry geospatial_module_entry;
 #define ROTATION_Y -0.2470;
 #define ROTATION_Z -0.8421;
 
+#define HEIGHT 24.7;
+
 
 PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
 PHP_FUNCTION(haversine);
 PHP_FUNCTION(helmert);
+PHP_FUNCTION(polar_to_cartesian);
+PHP_FUNCTION(cartesian_to_polar);
 
 #endif	/* PHP_GEOSPATIAL_H */
 
