@@ -36,27 +36,46 @@ extern zend_module_entry geospatial_module_entry;
 #include "TSRM.h"
 #endif
 
+typedef struct {
+   double    latitude;
+   double    longitude;
+} latLong;
+
+typedef struct {
+   double    a;
+   double    b;
+} geo_ellipsoid;
+
+
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
  * Calculate the radius using WGS-84's equatorial radius of
  * 6,378,1370m
  */
 #define GEO_EARTH_RADIUS 6378.137
+#define GEO_SEC_IN_DEG 3600
+
+#define GEO_WGS84 0x0001
+#define GEO_AIRY_1830 0x0002
+
 
 #define AIRY_1830_A 6377563.396
 #define AIRY_1830_B 6356256.910
 
-#define WGS84_OSGB36_X -446.448;
-#define WGS84_OSGB36_Y 125.157;
-#define WGS84_OSGB36_Z -542.060;
+#define WGS84_A 6378137.000
+#define WGS84_B 6356752.3142
 
-#define SCALE_CHANGE 1.0000204894;
+#define WGS84_OSGB36_X -446.448
+#define WGS84_OSGB36_Y 125.157
+#define WGS84_OSGB36_Z -542.060
 
-#define ROTATION_X -0.1502;
-#define ROTATION_Y -0.2470;
-#define ROTATION_Z -0.8421;
+#define SCALE_CHANGE 1.0000204894
 
-#define HEIGHT 24.7;
+#define ROTATION_X -0.1502
+#define ROTATION_Y -0.2470
+#define ROTATION_Z -0.8421
+
+#define HEIGHT 24.7
 
 
 PHP_MINIT_FUNCTION(geospatial);

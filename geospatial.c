@@ -41,15 +41,17 @@ ZEND_BEGIN_ARG_INFO_EX(helmert_args, 0, 0, 3)
     ZEND_ARG_INFO(0, z)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(polar_to_cartesian_args, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(polar_to_cartesian_args, 0, 0, 3)
     ZEND_ARG_INFO(0, latitude)
     ZEND_ARG_INFO(0, longitude)
+    ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 4)
     ZEND_ARG_INFO(0, x)
     ZEND_ARG_INFO(0, y)
     ZEND_ARG_INFO(0, z)
+    ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
 /* {{{ geospatial_functions[]
@@ -95,7 +97,9 @@ ZEND_GET_MODULE(geospatial)
 PHP_MINIT_FUNCTION(geospatial)
 {
 	REGISTER_DOUBLE_CONSTANT("GEO_DEG_TO_RAD", GEO_DEG_TO_RAD, CONST_CS | CONST_PERSISTENT);
-	REGISTER_DOUBLE_CONSTANT("GEO_EARTH_RADIUS", GEO_EARTH_RADIUS, CONST_CS | CONST_PERSISTENT);
+    REGISTER_DOUBLE_CONSTANT("GEO_EARTH_RADIUS", GEO_EARTH_RADIUS, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("GEO_AIRY_1830", GEO_AIRY_1830, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GEO_WGS84", GEO_WGS84, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -129,58 +133,51 @@ PHP_FUNCTION(helmert)
     }
 
     array_init(return_value);
-    rX = ROTATION_X;
-    rX /= 3600;
-    rX *= GEO_DEG_TO_RAD;
+    rX = ROTATION_X / GEO_SEC_IN_DEG * GEO_DEG_TO_RAD;
+    rY = ROTATION_Y / GEO_SEC_IN_DEG * GEO_DEG_TO_RAD;
+    rZ = ROTATION_Z / GEO_SEC_IN_DEG * GEO_DEG_TO_RAD;
 
-    rY = ROTATION_Y;
-    rY /= 3600;
-    rY *= GEO_DEG_TO_RAD;
+    xOut = WGS84_OSGB36_X;
+    xOut += (x - (rZ * y) + (rY * z)) * SCALE_CHANGE;
 
-    rZ = ROTATION_Z;
-    rZ /= 3600;
-    rZ *= GEO_DEG_TO_RAD;
+    yOut = WGS84_OSGB36_Y;
+    yOut += ((rZ * x) + y - (rX * z)) * SCALE_CHANGE;
 
-    xOut = x - (rZ * y) + (rY * z);
-    xOut *= SCALE_CHANGE;
-    xOut += WGS84_OSGB36_X;
+    zOut = WGS84_OSGB36_Z;
+    zOut += ((-1 * rY * x) + (rX * y) + z) * SCALE_CHANGE;
 
-    yOut = (rZ * x) + y - (rX * z);
-    yOut *= SCALE_CHANGE;
-    yOut += WGS84_OSGB36_Y;
-
-    zOut = (-rY * x) + (rX * y) + z;
-    zOut *= SCALE_CHANGE;
-    zOut += WGS84_OSGB36_Z;
-
-    add_next_index_double(return_value, xOut);
-    add_next_index_double(return_value, yOut);
-    add_next_index_double(return_value, zOut);
+    add_assoc_double(return_value, "x", xOut);
+    add_assoc_double(return_value, "y", yOut);
+    add_assoc_double(return_value, "z", zOut);
 }
 
 PHP_FUNCTION(polar_to_cartesian)
 {
     double latitude, longitude;
     double x, y, z;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd", &latitude, &longitude) == FAILURE) {
+    long reference_ellipsoid;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd|l", &latitude, &longitude, &reference_ellipsoid) == FAILURE) {
         return;
     }
-
+    geo_ellipsoid eli = {WGS84_A, WGS84_B};
+    if (reference_ellipsoid == GEO_AIRY_1830) {
+        eli.a  = AIRY_1830_A;
+        eli.b = AIRY_1830_B;
+    }
     array_init(return_value);
     double phi = latitude * GEO_DEG_TO_RAD;
     double lambda = longitude * GEO_DEG_TO_RAD;
-    double eSq = ((AIRY_1830_A * AIRY_1830_A)  - (AIRY_1830_B * AIRY_1830_B))  /  (AIRY_1830_A * AIRY_1830_A);
-    double nu = AIRY_1830_A / sqrt(1 - (eSq * sin(phi) * sin(phi)));
+    double eSq = ((eli.a * eli.a)  - (eli.b * eli.b))  /  (eli.a * eli.a);
+    double nu = eli.a / sqrt(1 - (eSq * sin(phi) * sin(phi)));
     x = nu + HEIGHT;
     x *= cos(phi) * cos(lambda);
     y = nu + HEIGHT;
     y *= cos(phi) * sin(lambda);
     z = ((1 - eSq) * nu) + HEIGHT;
     z*= sin(phi);
-    add_next_index_double(return_value, x);
-    add_next_index_double(return_value, y);
-    add_next_index_double(return_value, z);
-
+    add_assoc_double(return_value, "x", x);
+    add_assoc_double(return_value, "y", y);
+    add_assoc_double(return_value, "z", z);
 }
 
 PHP_FUNCTION(cartesian_to_polar)
@@ -188,14 +185,19 @@ PHP_FUNCTION(cartesian_to_polar)
     double latitude, longitude;
     double x, y, z;
     double nu, lambda, h;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd", &x, &y, &z) == FAILURE) {
+    long reference_ellipsoid;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|l", &x, &y, &z, &reference_ellipsoid) == FAILURE) {
         return;
     }
+    geo_ellipsoid eli = {WGS84_A, WGS84_B};
+    if (reference_ellipsoid == GEO_AIRY_1830) {
+        eli.a  = AIRY_1830_A;
+        eli.b = AIRY_1830_B;
+    }
     //aiming for 1m accuracy
-    double precision = 0.1 / AIRY_1830_A;
+    double precision = 0.1 / eli.a;
     array_init(return_value);
-    double eSq = ((AIRY_1830_A * AIRY_1830_A)  - (AIRY_1830_B * AIRY_1830_B))  /  (AIRY_1830_A * AIRY_1830_A);
+    double eSq = ((eli.a * eli.a)  - (eli.b * eli.b))  /  (eli.a * eli.a);
     double p = sqrt(x * x + y * y);
     double phi = atan2(z, p * (1 - eSq));
     double phiP = 2 * M_PI;
@@ -210,7 +212,6 @@ PHP_FUNCTION(cartesian_to_polar)
     add_assoc_double(return_value, "lat", phi / GEO_DEG_TO_RAD);
     add_assoc_double(return_value, "long", lambda / GEO_DEG_TO_RAD);
     add_assoc_double(return_value, "height", h);
-
 }
 
 /* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])

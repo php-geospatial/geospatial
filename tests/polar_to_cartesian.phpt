@@ -5,14 +5,14 @@ Test polar to cartesian
 $lat = 53.38361111111;
 $long = 1.4669444444;
 
-var_dump(polar_to_cartesian($lat, $long));
+var_dump(polar_to_cartesian($lat, $long, GEO_AIRY_1830));
 ?>
 --EXPECT--
 array(3) {
-  [0]=>
+  ["x"]=>
   float(3810891.6734396)
-  [1]=>
+  ["y"]=>
   float(97591.624686311)
-  [2]=>
+  ["z"]=>
   float(5095766.3939034)
 }
