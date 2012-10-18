@@ -37,15 +37,24 @@ extern zend_module_entry geospatial_module_entry;
 #endif
 
 typedef struct {
-   double    latitude;
-   double    longitude;
-} latLong;
+   double   latitude;
+   double   longitude;
+   double   height;
+} geo_lat_long;
 
 typedef struct {
    double    a;
    double    b;
 } geo_ellipsoid;
 
+typedef struct {
+  double x;
+  double y;
+  double z;
+} geo_cartesian;
+
+const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142};
+const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910};
 
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
@@ -57,13 +66,6 @@ typedef struct {
 
 #define GEO_WGS84 0x0001
 #define GEO_AIRY_1830 0x0002
-
-
-#define AIRY_1830_A 6377563.396
-#define AIRY_1830_B 6356256.910
-
-#define WGS84_A 6378137.000
-#define WGS84_B 6356752.3142
 
 #define WGS84_OSGB36_X -446.448
 #define WGS84_OSGB36_Y 125.157
@@ -85,6 +87,7 @@ PHP_FUNCTION(haversine);
 PHP_FUNCTION(helmert);
 PHP_FUNCTION(polar_to_cartesian);
 PHP_FUNCTION(cartesian_to_polar);
+PHP_FUNCTION(change_datum);
 
 #endif	/* PHP_GEOSPATIAL_H */
 

@@ -8,18 +8,15 @@ function getDecimal($d, $m, $s) {
     return $mul * (abs($d)+ $m / 60 + $s /3600);
 }
 
-$lat = getDecimal(53, 23, 1);
-$long = getDecimal(-1, 28, 1);
+$lat = getDecimal(53, 14, 10.5);
+$long = getDecimal(-2, 18, 25.7);
 
 $polar = change_datum($lat, $long, GEO_WGS84, GEO_AIRY_1830);
 
-var_dump($polar);
+echo round($polar['lat'] ,6),PHP_EOL;
+echo round($polar['long'] ,6),PHP_EOL;
+echo round($polar['height'] ,3),PHP_EOL;
 --EXPECT--
-array(3) {
-  ["lat"]=>
-  float(53.38334018402)
-  ["long"]=>
-  float(-1.4654162848544)
-  ["height"]=>
-  float(-24.780265408568)
-}
+53.235974
+-2.305717
+-25.649
