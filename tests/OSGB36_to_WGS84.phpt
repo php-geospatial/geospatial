@@ -17,6 +17,6 @@ echo round($polar['lat'] ,6),PHP_EOL;
 echo round($polar['long'] ,6),PHP_EOL;
 echo round($polar['height'] ,3),PHP_EOL;
 --EXPECT--
-53.236525
--2.308560
-75.062
+53.236526
+-2.30856
+75.061

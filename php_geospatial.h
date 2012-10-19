@@ -53,8 +53,38 @@ typedef struct {
   double z;
 } geo_cartesian;
 
+typedef struct {
+  double translation_x;
+  double translation_y;
+  double translation_z;
+  double scale_change;
+  double rotation_x;
+  double rotation_y;
+  double rotation_z;
+} geo_helmert_constants;
+
 const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142};
 const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910};
+
+const geo_helmert_constants wgs84_osgb36 = {
+  -446.448,
+  125.157,
+  -542.060,
+  0.0000204894,
+  -0.1502,
+  -0.2470,
+  -0.8421
+};
+
+const geo_helmert_constants osgb36_wgs84 = {
+  446.448,
+  -125.157,
+  542.060,
+  -0.0000204894,
+  0.1502,
+  0.2470,
+  0.8421
+};
 
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
@@ -66,16 +96,6 @@ const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910};
 
 #define GEO_WGS84 0x0001
 #define GEO_AIRY_1830 0x0002
-
-#define WGS84_OSGB36_X -446.448
-#define WGS84_OSGB36_Y 125.157
-#define WGS84_OSGB36_Z -542.060
-
-#define SCALE_CHANGE 1.0000204894
-
-#define ROTATION_X -0.1502
-#define ROTATION_Y -0.2470
-#define ROTATION_Z -0.8421
 
 #define HEIGHT 24.7
 
