@@ -61,6 +61,18 @@ ZEND_BEGIN_ARG_INFO_EX(change_datum_args, 0, 0, 4)
     ZEND_ARG_INFO(0, to_reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(to_decimal_args, 0, 0, 4)
+    ZEND_ARG_INFO(0, degrees)
+    ZEND_ARG_INFO(0, minutes)
+    ZEND_ARG_INFO(0, seconds)
+    ZEND_ARG_INFO(0, direction)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(to_dms_args, 0, 0, 2)
+    ZEND_ARG_INFO(0, decimal)
+    ZEND_ARG_INFO(0, coordinate)
+ZEND_END_ARG_INFO()
+
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
@@ -71,6 +83,8 @@ const zend_function_entry geospatial_functions[] = {
     PHP_FE(polar_to_cartesian, polar_to_cartesian_args)
     PHP_FE(cartesian_to_polar, cartesian_to_polar_args)
     PHP_FE(change_datum, change_datum_args)
+    PHP_FE(to_decimal, to_decimal_args)
+    PHP_FE(to_dms, to_dms_args)
     /* End of functions */
 	{ NULL, NULL, NULL }
 };
@@ -188,7 +202,7 @@ PHP_FUNCTION(helmert)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
         return;
     }
-    array_init(return_value);\
+    array_init(return_value);
     geo_helmert_constants helmert_constants = get_helmert_constants(from_reference_ellipsoid, to_reference_ellipsoid);
     point = php_helmert(x, y, z, helmert_constants);
     add_assoc_double(return_value, "x", point.x);
@@ -259,6 +273,53 @@ geo_lat_long php_cartesian_to_polar(double x, double y, double z, geo_ellipsoid 
     polar.height = h;
 
     return polar;
+}
+
+PHP_FUNCTION(to_decimal)
+{
+    double degrees, minutes, sign;
+    double seconds, decimal;
+    char *direction;
+    int direction_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|s", &degrees, &minutes, &seconds, &direction, &direction_len) == FAILURE) {
+        return;
+    }
+
+    sign = strcmp(direction, "S") == 0 || strcmp(direction, "W") == 0 ? -1 : 1;
+    decimal = degrees + minutes / 60 + seconds / 3600;
+    decimal *= sign;
+    RETURN_DOUBLE(decimal);
+}
+
+
+PHP_FUNCTION(to_dms)
+{
+    double decimal, seconds;
+    int degrees, minutes;
+    char *direction;
+    char *coordinate;
+    int coordinate_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ds", &decimal, &coordinate, &coordinate_len) == FAILURE) {
+        return;
+    }
+    if (strcmp(coordinate, "longitude") == 0) {
+        direction = decimal < 1 ? "W" : "E";
+    } else {
+        direction = decimal < 1 ? "S" : "N";
+    }
+
+    array_init(return_value);
+    decimal = fabs(decimal);
+    degrees = (int) decimal;
+    minutes = decimal * 60 - degrees * 60;
+    seconds = decimal * 3600 - degrees * 3600 - minutes * 60;
+    seconds = (round(seconds *100)) / 100;
+    add_assoc_long(return_value, "degrees", degrees);
+    add_assoc_long(return_value, "minutes", minutes);
+    add_assoc_double(return_value, "seconds", seconds);
+    add_assoc_string(return_value, "direction", direction, 1);
 }
 
 PHP_FUNCTION(cartesian_to_polar)

@@ -108,6 +108,8 @@ PHP_FUNCTION(helmert);
 PHP_FUNCTION(polar_to_cartesian);
 PHP_FUNCTION(cartesian_to_polar);
 PHP_FUNCTION(change_datum);
+PHP_FUNCTION(to_decimal);
+PHP_FUNCTION(to_dms);
 
 #endif	/* PHP_GEOSPATIAL_H */
 
