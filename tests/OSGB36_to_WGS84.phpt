@@ -1,22 +1,35 @@
 --TEST--
-WGS84 to OSGB36
+OSGB36 to WGS84
 --FILE--
 <?php
 
-function getDecimal($d, $m, $s) {
-    $mul =  $d < 0 ? -1 : 1;
-    return $mul * (abs($d)+ $m / 60 + $s /3600);
-}
+$lat = dms_to_decimal(53, 14, 10.5, 'N');
+$long = dms_to_decimal(2, 18, 25.7, 'W');
 
-$lat = getDecimal(53, 14, 10.5);
-$long = getDecimal(-2, 18, 25.7);
+$polar = transform_datum($lat, $long, GEO_AIRY_1830, GEO_WGS84);
 
-$polar = change_datum($lat, $long, GEO_AIRY_1830, GEO_WGS84);
-
-echo round($polar['lat'] ,6),PHP_EOL;
-echo round($polar['long'] ,6),PHP_EOL;
+var_dump(decimal_to_dms($polar['lat'], 'latitude'));
+var_dump(decimal_to_dms($polar['long'] ,'longitude'));
 echo round($polar['height'] ,3),PHP_EOL;
 --EXPECT--
-53.236526
--2.30856
+array(4) {
+  ["degrees"]=>
+  int(53)
+  ["minutes"]=>
+  int(14)
+  ["seconds"]=>
+  float(11.493372672732)
+  ["direction"]=>
+  string(1) "N"
+}
+array(4) {
+  ["degrees"]=>
+  int(2)
+  ["minutes"]=>
+  int(18)
+  ["seconds"]=>
+  float(30.817794659248)
+  ["direction"]=>
+  string(1) "W"
+}
 75.061

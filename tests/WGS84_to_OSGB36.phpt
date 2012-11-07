@@ -3,15 +3,10 @@ WGS84 to OSGB36
 --FILE--
 <?php
 
-function getDecimal($d, $m, $s) {
-    $mul =  $d < 0 ? -1 : 1;
-    return $mul * (abs($d)+ $m / 60 + $s /3600);
-}
+$lat = dms_to_decimal(53, 23, 1);
+$long = dms_to_decimal(-1, 28, 1);
 
-$lat = getDecimal(53, 23, 1);
-$long = getDecimal(-1, 28, 1);
-
-$polar = change_datum($lat, $long, GEO_WGS84, GEO_AIRY_1830);
+$polar = transform_datum($lat, $long, GEO_WGS84, GEO_AIRY_1830);
 
 var_dump($polar);
 --EXPECT--

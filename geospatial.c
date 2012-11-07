@@ -54,21 +54,21 @@ ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 4)
     ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(change_datum_args, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(transform_datum_args, 0, 0, 4)
     ZEND_ARG_INFO(0, latitude)
     ZEND_ARG_INFO(0, longitude)
     ZEND_ARG_INFO(0, from_reference_ellipsoid)
     ZEND_ARG_INFO(0, to_reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(to_decimal_args, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(dms_to_decimal_args, 0, 0, 4)
     ZEND_ARG_INFO(0, degrees)
     ZEND_ARG_INFO(0, minutes)
     ZEND_ARG_INFO(0, seconds)
     ZEND_ARG_INFO(0, direction)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(to_dms_args, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(decimal_to_dms_args, 0, 0, 2)
     ZEND_ARG_INFO(0, decimal)
     ZEND_ARG_INFO(0, coordinate)
 ZEND_END_ARG_INFO()
@@ -82,9 +82,9 @@ const zend_function_entry geospatial_functions[] = {
 	PHP_FE(helmert, helmert_args)
     PHP_FE(polar_to_cartesian, polar_to_cartesian_args)
     PHP_FE(cartesian_to_polar, cartesian_to_polar_args)
-    PHP_FE(change_datum, change_datum_args)
-    PHP_FE(to_decimal, to_decimal_args)
-    PHP_FE(to_dms, to_dms_args)
+    PHP_FE(transform_datum, transform_datum_args)
+    PHP_FE(dms_to_decimal, dms_to_decimal_args)
+    PHP_FE(decimal_to_dms, decimal_to_dms_args)
     /* End of functions */
 	{ NULL, NULL, NULL }
 };
@@ -170,7 +170,7 @@ geo_helmert_constants get_helmert_constants(long from, long to)
     }
 }
 
-geo_cartesian php_helmert(double x, double y, double z, geo_helmert_constants helmet_consts)
+geo_cartesian helmert(double x, double y, double z, geo_helmert_constants helmet_consts)
 {
     double rX, rY, rZ;
     double xOut, yOut, zOut;
@@ -193,24 +193,7 @@ geo_cartesian php_helmert(double x, double y, double z, geo_helmert_constants he
     return point;
 }
 
-
-PHP_FUNCTION(helmert)
-{
-    double x, y, z;
-    geo_cartesian point;
-    long from_reference_ellipsoid, to_reference_ellipsoid;
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
-        return;
-    }
-    array_init(return_value);
-    geo_helmert_constants helmert_constants = get_helmert_constants(from_reference_ellipsoid, to_reference_ellipsoid);
-    point = php_helmert(x, y, z, helmert_constants);
-    add_assoc_double(return_value, "x", point.x);
-    add_assoc_double(return_value, "y", point.y);
-    add_assoc_double(return_value, "z", point.z);
-}
-
-geo_cartesian php_polar_to_cartesian(double latitude, double longitude, geo_ellipsoid eli)
+geo_cartesian polar_to_cartesian(double latitude, double longitude, geo_ellipsoid eli)
 {
     double x, y, z;
 
@@ -231,24 +214,8 @@ geo_cartesian php_polar_to_cartesian(double latitude, double longitude, geo_elli
     return point;
 }
 
-PHP_FUNCTION(polar_to_cartesian)
-{
-    double latitude, longitude;
-    long reference_ellipsoid;
-    geo_cartesian point;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd|l", &latitude, &longitude, &reference_ellipsoid) == FAILURE) {
-        return;
-    }
-    geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
-    array_init(return_value);
-    point = php_polar_to_cartesian(latitude, longitude, eli);
-    add_assoc_double(return_value, "x", point.x);
-    add_assoc_double(return_value, "y", point.y);
-    add_assoc_double(return_value, "z", point.z);
-}
-
-geo_lat_long php_cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
+geo_lat_long cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
 {
 
     double latitude, longitude;
@@ -275,25 +242,32 @@ geo_lat_long php_cartesian_to_polar(double x, double y, double z, geo_ellipsoid 
     return polar;
 }
 
-PHP_FUNCTION(to_decimal)
+/* {{{ proto dms_to_decimal(double degrees, double minutes, double seconds [,string direction])
+ * Convert degrees, minutes & seconds values to decimal degrees */
+PHP_FUNCTION(dms_to_decimal)
 {
     double degrees, minutes, sign;
     double seconds, decimal;
-    char *direction;
+    char *direction = "";
     int direction_len;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|s", &degrees, &minutes, &seconds, &direction, &direction_len) == FAILURE) {
         return;
     }
-
-    sign = strcmp(direction, "S") == 0 || strcmp(direction, "W") == 0 ? -1 : 1;
-    decimal = degrees + minutes / 60 + seconds / 3600;
+    if (strcmp("", direction) == 0) {
+        sign = degrees > 1 ? 1 : -1;
+    } else {
+        sign = strcmp(direction, "S") == 0 || strcmp(direction, "W") == 0 ? -1 : 1;
+    }
+    decimal = abs(degrees) + minutes / 60 + seconds / 3600;
     decimal *= sign;
     RETURN_DOUBLE(decimal);
 }
+/* }}} */
 
-
-PHP_FUNCTION(to_dms)
+/* {{{ proto decimal_to_dms(double decimal, string coordinate)
+ * Convert decimal degrees value to whole degrees and minutes and decimal seconds */
+PHP_FUNCTION(decimal_to_dms)
 {
     double decimal, seconds;
     int degrees, minutes;
@@ -315,13 +289,54 @@ PHP_FUNCTION(to_dms)
     degrees = (int) decimal;
     minutes = decimal * 60 - degrees * 60;
     seconds = decimal * 3600 - degrees * 3600 - minutes * 60;
-    seconds = (round(seconds *100)) / 100;
     add_assoc_long(return_value, "degrees", degrees);
     add_assoc_long(return_value, "minutes", minutes);
     add_assoc_double(return_value, "seconds", seconds);
     add_assoc_string(return_value, "direction", direction, 1);
 }
+/* }}} */
 
+/* {{{ proto helmert(double x, double y, double z [, long from_reference_ellipsoid, long to_reference_ellipsoid])
+ * Convert polar ones (latitude, longitude) tp cartesian co-ordiantes (x, y, z)  */
+PHP_FUNCTION(helmert)
+{
+    double x, y, z;
+    geo_cartesian point;
+    long from_reference_ellipsoid, to_reference_ellipsoid;
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
+        return;
+    }
+    array_init(return_value);
+    geo_helmert_constants helmert_constants = get_helmert_constants(from_reference_ellipsoid, to_reference_ellipsoid);
+    point = helmert(x, y, z, helmert_constants);
+    add_assoc_double(return_value, "x", point.x);
+    add_assoc_double(return_value, "y", point.y);
+    add_assoc_double(return_value, "z", point.z);
+}
+/* }}} */
+
+/* {{{ proto polar_to_cartesian(double latitude, double longitude[, long reference_ellipsoid])
+ * Convert polar ones (latitude, longitude) tp cartesian co-ordiantes (x, y, z)  */
+PHP_FUNCTION(polar_to_cartesian)
+{
+    double latitude, longitude;
+    long reference_ellipsoid;
+    geo_cartesian point;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd|l", &latitude, &longitude, &reference_ellipsoid) == FAILURE) {
+        return;
+    }
+    geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
+    array_init(return_value);
+    point = polar_to_cartesian(latitude, longitude, eli);
+    add_assoc_double(return_value, "x", point.x);
+    add_assoc_double(return_value, "y", point.y);
+    add_assoc_double(return_value, "z", point.z);
+}
+/* }}} */
+
+/* {{{ proto cartesian_to_polar(double x, double y, double z [, long reference_ellipsoid])
+ * Convert cartesian co-ordiantes (x, y, z) to polar ones (latitude, longitude) */
 PHP_FUNCTION(cartesian_to_polar)
 {
     double x, y, z;
@@ -333,14 +348,17 @@ PHP_FUNCTION(cartesian_to_polar)
     }
     geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
     array_init(return_value);
-    polar = php_cartesian_to_polar(x, y, z, eli);
+    polar = cartesian_to_polar(x, y, z, eli);
     add_assoc_double(return_value, "lat", polar.latitude);
     add_assoc_double(return_value, "long", polar.longitude);
     add_assoc_double(return_value, "height", polar.height);
 }
+/* }}} */
 
 
-PHP_FUNCTION(change_datum)
+/* {{{ proto transform_datum(double latitude, double longitude, long from_reference_ellipsoid, long to_reference_ellipsoid)
+ * Unified function to transform projection of geo-cordinates between datums */
+PHP_FUNCTION(transform_datum)
 {
     double latitude, longitude;
     long from_reference_ellipsoid, to_reference_ellipsoid;
@@ -351,16 +369,17 @@ PHP_FUNCTION(change_datum)
     }
     geo_ellipsoid eli_from = get_ellipsoid(from_reference_ellipsoid);
     geo_ellipsoid eli_to = get_ellipsoid(to_reference_ellipsoid);
-    point = php_polar_to_cartesian(latitude, longitude, eli_from);
+    point = polar_to_cartesian(latitude, longitude, eli_from);
     geo_helmert_constants helmert_constants = get_helmert_constants(from_reference_ellipsoid, to_reference_ellipsoid);
-    converted_point = php_helmert(point.x, point.y, point.z, helmert_constants);
-    polar = php_cartesian_to_polar(converted_point.x, converted_point.y, converted_point.z, eli_to);
+    converted_point = helmert(point.x, point.y, point.z, helmert_constants);
+    polar = cartesian_to_polar(converted_point.x, converted_point.y, converted_point.z, eli_to);
 
     array_init(return_value);
     add_assoc_double(return_value, "lat", polar.latitude);
     add_assoc_double(return_value, "long", polar.longitude);
     add_assoc_double(return_value, "height", polar.height);
 }
+/* }}} */
 
 /* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])
  * Calculates the greater circle distance between the two lattitude/longitude pairs */
