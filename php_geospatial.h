@@ -53,6 +53,10 @@ typedef struct {
   double z;
 } geo_cartesian;
 
+/**
+ *  Structure of the seven variables used in the helmert transformation
+ *
+ */
 typedef struct {
   double translation_x;
   double translation_y;
@@ -63,9 +67,19 @@ typedef struct {
   double rotation_z;
 } geo_helmert_constants;
 
+/**
+ *  The WGS84 elipsoid semi major axes
+ */
 const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142};
+/**
+ *  The Airy 1830 elipsoid semi major axes
+ */
 const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910};
 
+/**
+ *  The values of the 7 variables for performing helmert transformation between
+ *  wgs84 and osgb36
+ */
 const geo_helmert_constants wgs84_osgb36 = {
   -446.448,
   125.157,
@@ -75,7 +89,10 @@ const geo_helmert_constants wgs84_osgb36 = {
   -0.2470,
   -0.8421
 };
-
+/**
+ *  The values of the 7 variables for performing helmert transformation between
+ *  osgb36 and wgs84 -1 * the values for the reverse transformation
+ */
 const geo_helmert_constants osgb36_wgs84 = {
   446.448,
   -125.157,
