@@ -16,7 +16,8 @@ $diferenceAiry = haversine($polar['lat'], $polar['long'], $polar['lat'], 0);
 //lat long of merdian in Airy 1830 ideally long of 0
 var_dump($polar);
 //distance in m of difference from lat long and meridian
-var_dump($diferenceWGS84 * 1000, $diferenceAiry * 1000);
+echo round($diferenceWGS84 * 1000, 8),PHP_EOL;
+echo round($diferenceAiry * 1000, 8),PHP_EOL;
 --EXPECT--
 array(3) {
   ["lat"]=>
@@ -26,5 +27,5 @@ array(3) {
   ["height"]=>
   float(-21.205192557536)
 }
-float(102.84185171429)
-float(9.4481679649233)
+102.84185171
+9.44816796
