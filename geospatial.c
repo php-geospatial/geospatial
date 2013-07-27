@@ -97,27 +97,37 @@ PHP_MINFO_FUNCTION(geospatial)
 }
 /* }}} */
 
-/* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])
+double php_geo_haversine(double from_lat, double from_long, double to_lat, double to_long, double radius)
+{
+	double delta_lat, delta_long;
+	double latH, longH, result;
+
+	delta_lat = (from_lat - to_lat) * GEO_DEG_TO_RAD;
+	delta_long = (from_long - to_long) * GEO_DEG_TO_RAD;
+
+	latH = sin(delta_lat * 0.5);
+	latH *= latH;
+	longH = sin(delta_long * 0.5);
+	longH *= longH;
+
+	result = cos(from_lat * GEO_DEG_TO_RAD) * cos(to_lat * GEO_DEG_TO_RAD);
+	result = radius * 2.0 * asin(sqrt(latH + result * longH));
+
+	return result;
+}
+
+/* {{{ proto double haversine(double from_lat, double from_long, double to_lat, double to_long [, double radius ])
  * Calculates the greater circle distance between the two lattitude/longitude pairs */
 PHP_FUNCTION(haversine)
 {
-	double fromLat, fromLong, toLat, toLong, deltaLat, deltaLong;
-	double radius = GEO_EARTH_RADIUS, latH, longH, result;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd|d", &fromLat, &fromLong, &toLat, &toLong, &radius) == FAILURE) {
+	double from_lat, from_long, to_lat, to_long;
+	double radius = GEO_EARTH_RADIUS;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd|d", &from_lat, &from_long, &to_lat, &to_long, &radius) == FAILURE) {
 		return;
 	}
 
-	deltaLat = (fromLat - toLat) * GEO_DEG_TO_RAD;
-	deltaLong = (fromLong - toLong) * GEO_DEG_TO_RAD;
-
-	latH = sin(deltaLat * 0.5);
-	latH *= latH;
-	longH = sin(deltaLong * 0.5);
-	longH *= longH;
-
-	result = cos(fromLat * GEO_DEG_TO_RAD) * cos(toLat * GEO_DEG_TO_RAD);
-	result = radius * 2.0 * asin(sqrt(latH + result * longH));
-	RETURN_DOUBLE(result);
+	RETURN_DOUBLE(php_geo_haversine(from_lat, from_long, to_lat, to_long, radius));
 }
 /* }}} */
 
