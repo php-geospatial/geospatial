@@ -12,7 +12,7 @@ echo haversine(90, 0, -90, 0, 6356.7523);
 
 	Accept defined (equatorial) Earth Radius in km (which is based on WGS-84):
 	- 6,378,1370m (at the equator).
-	- 6,356,7523m (at the equator).
+	- 6,356,7523m (around the poles).
 */
 ?>
 --EXPECT--
