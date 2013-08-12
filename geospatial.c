@@ -102,15 +102,15 @@ double php_geo_haversine(double from_lat, double from_long, double to_lat, doubl
 	double delta_lat, delta_long;
 	double latH, longH, result;
 
-	delta_lat = (from_lat - to_lat) * GEO_DEG_TO_RAD;
-	delta_long = (from_long - to_long) * GEO_DEG_TO_RAD;
+	delta_lat = (from_lat - to_lat);
+	delta_long = (from_long - to_long);
 
 	latH = sin(delta_lat * 0.5);
 	latH *= latH;
 	longH = sin(delta_long * 0.5);
 	longH *= longH;
 
-	result = cos(from_lat * GEO_DEG_TO_RAD) * cos(to_lat * GEO_DEG_TO_RAD);
+	result = cos(from_lat) * cos(to_lat);
 	result = radius * 2.0 * asin(sqrt(latH + result * longH));
 
 	return result;
@@ -127,7 +127,7 @@ PHP_FUNCTION(haversine)
 		return;
 	}
 
-	RETURN_DOUBLE(php_geo_haversine(from_lat, from_long, to_lat, to_long, radius));
+	RETURN_DOUBLE(php_geo_haversine(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD, radius) / GEO_DEG_TO_RAD);
 }
 /* }}} */
 
