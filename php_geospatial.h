@@ -36,18 +36,98 @@ extern zend_module_entry geospatial_module_entry;
 #include "TSRM.h"
 #endif
 
+typedef struct {
+   double   latitude;
+   double   longitude;
+   double   height;
+} geo_lat_long;
+
+typedef struct {
+   double    a;
+   double    b;
+} geo_ellipsoid;
+
+typedef struct {
+  double x;
+  double y;
+  double z;
+} geo_cartesian;
+
+/**
+ *  Structure of the seven variables used in the helmert transformation
+ *
+ */
+typedef struct {
+  double translation_x;
+  double translation_y;
+  double translation_z;
+  double scale_change;
+  double rotation_x;
+  double rotation_y;
+  double rotation_z;
+} geo_helmert_constants;
+
+/**
+ *  The WGS84 elipsoid semi major axes
+ */
+const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142};
+/**
+ *  The Airy 1830 elipsoid semi major axes
+ */
+const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910};
+
+/**
+ *  The values of the 7 variables for performing helmert transformation between
+ *  wgs84 and osgb36
+ */
+const geo_helmert_constants wgs84_osgb36 = {
+  -446.448,
+  125.157,
+  -542.060,
+  0.0000204894,
+  -0.1502,
+  -0.2470,
+  -0.8421
+};
+/**
+ *  The values of the 7 variables for performing helmert transformation between
+ *  osgb36 and wgs84 -1 * the values for the reverse transformation
+ */
+const geo_helmert_constants osgb36_wgs84 = {
+  446.448,
+  -125.157,
+  542.060,
+  -0.0000204894,
+  0.1502,
+  0.2470,
+  0.8421
+};
+
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
  * Calculate the radius using WGS-84's equatorial radius of
  * 6,378,1370m
  */
 #define GEO_EARTH_RADIUS 6378.137
+#define GEO_SEC_IN_DEG 3600
+
+#define GEO_WGS84 0x0001
+#define GEO_AIRY_1830 0x0002
+
+#define HEIGHT 24.7
+
 
 PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
 PHP_FUNCTION(haversine);
 PHP_FUNCTION(fraction_along_gc_line);
+PHP_FUNCTION(helmert);
+PHP_FUNCTION(polar_to_cartesian);
+PHP_FUNCTION(cartesian_to_polar);
+PHP_FUNCTION(transform_datum);
+PHP_FUNCTION(dms_to_decimal);
+PHP_FUNCTION(decimal_to_dms);
 
 #endif	/* PHP_GEOSPATIAL_H */
 
