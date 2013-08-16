@@ -11,5 +11,5 @@ $lat2 = $lat1;
 $lon2 = -104.80;
 var_dump(haversine($lat1, $lon1, $lat2, $lon2));
 ?>
---EXPECT--
-float(7.38469839293155)
+--EXPECTF--
+float(7.384698392931%d)
