@@ -47,6 +47,7 @@ PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
 PHP_FUNCTION(haversine);
+PHP_FUNCTION(fraction_along_gc_line);
 
 #endif	/* PHP_GEOSPATIAL_H */
 
