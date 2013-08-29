@@ -227,11 +227,9 @@ geo_ellipsoid get_ellipsoid(long ellipsoid_const)
 	switch (ellipsoid_const) {
 		case GEO_AIRY_1830:
 			return airy_1830;
-			break;
 		case GEO_WGS84:
 		default:
 			return wgs84;
-			break;
 	}
 }
 
@@ -240,11 +238,9 @@ geo_helmert_constants get_helmert_constants(long from, long to)
 	switch (from - to) {
 		case 1:
 			return osgb36_wgs84;
-			break;
 		default:
 		case -1:
 			return wgs84_osgb36;
-			break;
 	}
 }
 
