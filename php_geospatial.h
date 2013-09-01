@@ -45,6 +45,7 @@ typedef struct {
 typedef struct {
    double    a;
    double    b;
+   double    f;
 } geo_ellipsoid;
 
 typedef struct {
@@ -70,11 +71,15 @@ typedef struct {
 /**
  *  The WGS84 elipsoid semi major axes
  */
-const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142};
+const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142, 1.0/298.257223563};
 /**
  *  The Airy 1830 elipsoid semi major axes
  */
-const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910};
+const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910, 1.0/299.3249646};
+/**
+ *  The GRS 80 elipsoid semi major axes
+ */
+const geo_ellipsoid grs80 = {6378137.000, 6356752.314140, 1.0/298.257222101};
 
 /**
  *  The values of the 7 variables for performing helmert transformation between
@@ -128,6 +133,7 @@ PHP_FUNCTION(cartesian_to_polar);
 PHP_FUNCTION(transform_datum);
 PHP_FUNCTION(dms_to_decimal);
 PHP_FUNCTION(decimal_to_dms);
+PHP_FUNCTION(vincenty);
 
 #endif	/* PHP_GEOSPATIAL_H */
 
