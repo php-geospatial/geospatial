@@ -128,6 +128,7 @@ PHP_FUNCTION(cartesian_to_polar);
 PHP_FUNCTION(transform_datum);
 PHP_FUNCTION(dms_to_decimal);
 PHP_FUNCTION(decimal_to_dms);
+PHP_FUNCTION(rdp_simplify);
 
 #endif	/* PHP_GEOSPATIAL_H */
 

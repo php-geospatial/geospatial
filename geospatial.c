@@ -27,6 +27,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_geospatial.h"
+#include "geo_array.h"
 
 ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 4)
 	ZEND_ARG_INFO(0, fromLatitude)
@@ -81,6 +82,11 @@ ZEND_BEGIN_ARG_INFO_EX(decimal_to_dms_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, coordinate)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(rdp_simplify_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, pointsArray)
+	ZEND_ARG_INFO(0, epsilon)
+ZEND_END_ARG_INFO()
+
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
@@ -94,6 +100,7 @@ const zend_function_entry geospatial_functions[] = {
 	PHP_FE(transform_datum, transform_datum_args)
 	PHP_FE(dms_to_decimal, dms_to_decimal_args)
 	PHP_FE(decimal_to_dms, decimal_to_dms_args)
+	PHP_FE(rdp_simplify, rdp_simplify_args)
 	/* End of functions */
 	{ NULL, NULL, NULL }
 };
@@ -449,6 +456,7 @@ PHP_FUNCTION(transform_datum)
 	long from_reference_ellipsoid, to_reference_ellipsoid;
 	geo_cartesian point, converted_point;
 	geo_lat_long polar;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddll", &latitude, &longitude, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
 		return;
 	}
@@ -526,6 +534,142 @@ PHP_FUNCTION(fraction_along_gc_line)
 	);
 
 	retval_point_from_coordinates(return_value, res_long / GEO_DEG_TO_RAD, res_lat / GEO_DEG_TO_RAD);
+}
+/* }}} */
+
+geo_array *geo_hashtable_to_array(zval *array)
+{
+	geo_array *tmp;
+	int element_count;
+	HashPosition pos;
+	zval **entry;
+	zval  **z_lon, **z_lat;
+	int   i = 0;
+
+	element_count = zend_hash_num_elements(Z_ARRVAL_P(array));
+	tmp = geo_array_ctor(element_count);
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
+
+		if (Z_TYPE_PP(entry) != IS_ARRAY) {
+			goto failure;
+		}
+		if (zend_hash_num_elements(Z_ARRVAL_PP(entry)) != 2)
+		{
+			goto failure;
+		}
+		if (zend_hash_index_find(HASH_OF(*entry), 0, (void**) &z_lon) != SUCCESS) {
+			return 0;
+		}
+		if (zend_hash_index_find(HASH_OF(*entry), 1, (void**) &z_lat) != SUCCESS) {
+			return 0;
+		}
+		convert_to_double_ex(z_lon);
+		convert_to_double_ex(z_lat);
+
+		tmp->x[i] = Z_DVAL_PP(z_lon);
+		tmp->y[i] = Z_DVAL_PP(z_lat);
+		tmp->status[i] = 1;
+
+		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos);
+		i++;
+	}
+
+	return tmp;
+
+failure:
+	geo_array_dtor(tmp);
+	return NULL;
+}
+
+double rdp_find_perpendicular_distable(double pX, double pY, double p1X, double p1Y, double p2X, double p2Y)
+{
+	double slope, intercept, result;
+
+	if (p1X == p2X) {
+		return fabs(pX - p1X);
+	} else {
+		slope = (p2Y - p1Y) / (p2X - p1X);
+		intercept = p1Y - (slope * p1X);
+		result = fabs(slope * pX - pY + intercept) / sqrt(pow(slope, 2) + 1);
+		return result;
+	}
+}
+
+void rdp_simplify(geo_array *points, double epsilon, int start, int end)
+{
+	double firstX = points->x[start];
+	double firstY = points->y[start];
+	double lastX = points->x[end];
+	double lastY = points->y[end];
+	int    index = -1;
+	double dist  = 0.0, current_dist;
+	int    i;
+
+	if (end - start < 2) {
+		return;
+	}
+
+	for (i = start + 1; i < end; i++) {
+		if (!points->status[i]) {
+			continue;
+		}
+
+		current_dist = rdp_find_perpendicular_distable(points->x[i], points->y[i], firstX, firstY, lastX, lastY);
+
+		if (current_dist > dist) {
+			dist = current_dist;
+			index = i;
+		}
+	}
+
+	if (dist > epsilon) {
+		rdp_simplify(points, epsilon, start, index);
+		rdp_simplify(points, epsilon, index, end);
+
+		return;
+	} else {
+		for (i = start + 1; i < end; i++) {
+			points->status[i] = 0;
+		}
+		return;
+	}
+}
+
+/* {{{ proto array rdp_simplify(array points, float epsilon)
+   Simplifies a 2D dimensional line according to the Ramer-Douglas-Peucker algorithm */
+PHP_FUNCTION(rdp_simplify)
+{
+	zval      *points_array;
+	double     epsilon;
+	geo_array *points;
+	int        i;
+	zval      *pair;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd", &points_array, &epsilon) == FAILURE) {
+		return;
+	}
+
+	if (!Z_TYPE_P(points_array) == IS_ARRAY) {
+		return;
+	}
+
+	array_init(return_value);
+
+	points = geo_hashtable_to_array(points_array);
+	rdp_simplify(points, epsilon, 0, points->count - 1);
+	for (i = 0; i < points->count; i++) {
+		if (points->status[i]) {
+			MAKE_STD_ZVAL(pair);
+			array_init(pair);
+			add_next_index_double(pair, points->x[i]);
+			add_next_index_double(pair, points->y[i]);
+			add_next_index_zval(return_value, pair);
+		}
+	}
+
+	geo_array_dtor(points);
 }
 /* }}} */
 
