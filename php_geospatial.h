@@ -133,7 +133,11 @@ PHP_FUNCTION(cartesian_to_polar);
 PHP_FUNCTION(transform_datum);
 PHP_FUNCTION(dms_to_decimal);
 PHP_FUNCTION(decimal_to_dms);
+<<<<<<< HEAD
 PHP_FUNCTION(vincenty);
+=======
+PHP_FUNCTION(rdp_simplify);
+>>>>>>> 53918a081d6392588cd4dae701af9b6f4ea78527
 
 #endif	/* PHP_GEOSPATIAL_H */
 
