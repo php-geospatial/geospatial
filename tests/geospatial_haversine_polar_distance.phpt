@@ -6,7 +6,15 @@ Check the haversine function returns the correct distance between the North and 
 precision=14
 --FILE--
 <?php 
-echo haversine(90, 0, -90, 0, 6356.7523);
+$from = array(
+	'type' => 'Point',
+	'coordinates' => array( 0, -90 )
+);
+$to = array(
+	'type' => 'Point',
+	'coordinates' => array( 0, 90 )
+);
+echo haversine($from, $to, 6356.7523);
 /*
 	Test the haversine distance between the North and South poles.
 
