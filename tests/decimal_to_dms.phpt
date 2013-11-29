@@ -8,7 +8,7 @@ var_dump($dms);
 
 $dms = decimal_to_dms(-1.034291666667, 'latitude');
 var_dump($dms);
-
+?>
 --EXPECT--
 array(4) {
   ["degrees"]=>

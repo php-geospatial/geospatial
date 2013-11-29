@@ -11,6 +11,7 @@ $from = array('type' => 'Point', 'coordinates' => array( $long, $lat ) );
 $polar = transform_datum($from, GEO_WGS84, GEO_AIRY_1830);
 
 var_dump($polar);
+?>
 --EXPECT--
 array(2) {
   ["type"]=>
