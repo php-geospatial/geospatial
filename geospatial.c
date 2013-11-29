@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,12 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Authors: Derick Rethans <github@derickrethans.nl>                    |
+  |          Michael Maclean <michael@no-surprises.co.uk>                |
+  |          Nathaniel McHugh <nmchugh@inviqa.com>                       |
+  |          Marcus Deglos <marcus@deglos.com>                           |
   +----------------------------------------------------------------------+
 */
-
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -328,7 +328,7 @@ geo_lat_long cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
 	return polar;
 }
 
-/* {{{ proto dms_to_decimal(double degrees, double minutes, double seconds [,string direction])
+/* {{{ proto double dms_to_decimal(double degrees, double minutes, double seconds [,string direction])
  * Convert degrees, minutes & seconds values to decimal degrees */
 PHP_FUNCTION(dms_to_decimal)
 {
@@ -353,7 +353,7 @@ PHP_FUNCTION(dms_to_decimal)
 }
 /* }}} */
 
-/* {{{ proto decimal_to_dms(double decimal, string coordinate)
+/* {{{ proto array decimal_to_dms(double decimal, string coordinate)
  * Convert decimal degrees value to whole degrees and minutes and decimal seconds */
 PHP_FUNCTION(decimal_to_dms)
 {
@@ -385,13 +385,14 @@ PHP_FUNCTION(decimal_to_dms)
 }
 /* }}} */
 
-/* {{{ proto helmert(double x, double y, double z [, long from_reference_ellipsoid, long to_reference_ellipsoid])
- * Convert polar ones (latitude, longitude) tp cartesian co-ordiantes (x, y, z)  */
+/* {{{ proto array helmert(double x, double y, double z [, long from_reference_ellipsoid, long to_reference_ellipsoid])
+ * Convert cartesian co-ordinates between reference elipsoids  */
 PHP_FUNCTION(helmert)
 {
 	double x, y, z;
 	geo_cartesian point;
-	long from_reference_ellipsoid, to_reference_ellipsoid;
+	long from_reference_ellipsoid = 0, to_reference_ellipsoid = 0;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
 		return;
 	}
@@ -405,7 +406,7 @@ PHP_FUNCTION(helmert)
 }
 /* }}} */
 
-/* {{{ proto polar_to_cartesian(double latitude, double longitude[, long reference_ellipsoid])
+/* {{{ proto array polar_to_cartesian(double latitude, double longitude[, long reference_ellipsoid])
  * Convert polar ones (latitude, longitude) tp cartesian co-ordiantes (x, y, z)  */
 PHP_FUNCTION(polar_to_cartesian)
 {
@@ -426,8 +427,8 @@ PHP_FUNCTION(polar_to_cartesian)
 }
 /* }}} */
 
-/* {{{ proto cartesian_to_polar(double x, double y, double z [, long reference_ellipsoid])
- * Convert cartesian co-ordiantes (x, y, z) to polar ones (latitude, longitude) */
+/* {{{ proto array cartesian_to_polar(double x, double y, double z [, long reference_ellipsoid])
+ * Convert cartesian co-ordinates (x, y, z) to polar ones (latitude, longitude) */
 PHP_FUNCTION(cartesian_to_polar)
 {
 	double x, y, z;
@@ -448,18 +449,21 @@ PHP_FUNCTION(cartesian_to_polar)
 /* }}} */
 
 
-/* {{{ proto transform_datum(double latitude, double longitude, long from_reference_ellipsoid, long to_reference_ellipsoid)
- * Unified function to transform projection of geo-cordinates between datums */
+/* {{{ proto GeoJSONPoint transform_datum(GeoJSONPoint coordinates, long from_reference_ellipsoid, long to_reference_ellipsoid)
+ * Unified function to transform projection of geo-coordinates between datums */
 PHP_FUNCTION(transform_datum)
 {
 	double latitude, longitude;
+	zval *geojson;
 	long from_reference_ellipsoid, to_reference_ellipsoid;
 	geo_cartesian point, converted_point;
 	geo_lat_long polar;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddll", &latitude, &longitude, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "all", &geojson, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
 		return;
 	}
+
+	geojson_point_to_lon_lat(geojson, &longitude, &latitude);
 
 	geo_ellipsoid eli_from = get_ellipsoid(from_reference_ellipsoid);
 	geo_ellipsoid eli_to = get_ellipsoid(to_reference_ellipsoid);
@@ -467,24 +471,30 @@ PHP_FUNCTION(transform_datum)
 	geo_helmert_constants helmert_constants = get_helmert_constants(from_reference_ellipsoid, to_reference_ellipsoid);
 	converted_point = helmert(point.x, point.y, point.z, helmert_constants);
 	polar = cartesian_to_polar(converted_point.x, converted_point.y, converted_point.z, eli_to);
-
+/*
 	array_init(return_value);
 	add_assoc_double(return_value, "lat", polar.latitude);
 	add_assoc_double(return_value, "long", polar.longitude);
 	add_assoc_double(return_value, "height", polar.height);
+*/
+	retval_point_from_coordinates(return_value, polar.longitude, polar.latitude);
 }
 /* }}} */
 
-/* {{{ proto haversine(double fromLat, double fromLong, double toLat, double toLong [, double radius ])
+/* {{{ proto double haversine(GeoJSONPoint from, GeoJSONPoint to [, double radius ])
  * Calculates the greater circle distance between the two lattitude/longitude pairs */
 PHP_FUNCTION(haversine)
 {
-	double from_lat, from_long, to_lat, to_long;
 	double radius = GEO_EARTH_RADIUS;
+	zval   *from_geojson, *to_geojson;
+	double from_lat, from_long, to_lat, to_long;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd|d", &from_lat, &from_long, &to_lat, &to_long, &radius) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa|d", &from_geojson, &to_geojson, &radius) == FAILURE) {
 		return;
 	}
+
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
 
 	RETURN_DOUBLE(php_geo_haversine(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD) * radius);
 }
@@ -508,7 +518,7 @@ void php_geo_fraction_along_gc_line(double from_lat, double from_long, double to
 	*res_long = atan2(y, x);
 }
 
-/* {{{ proto GeoJSON fraction_along_gc_line(GeoJSONPoint from, GeoJSONPoint to, double fraction [, double radius ])
+/* {{{ proto GeoJSONPoint fraction_along_gc_line(GeoJSONPoint from, GeoJSONPoint to, double fraction [, double radius ])
  * Calculates a lat/long pair at a fraction (0-1) of the distance along a GC line */
 PHP_FUNCTION(fraction_along_gc_line)
 {

@@ -1,5 +1,5 @@
 --TEST--
-helmert() function - basic test for helmert forumla
+helmert() function - basic test for helmert formula
 --FILE--
 <?php
 $x = 3909833.018;

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,11 +12,12 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Authors: Derick Rethans <github@derickrethans.nl>                    |
+  |          Michael Maclean <michael@no-surprises.co.uk>                |
+  |          Nathaniel McHugh <nmchugh@inviqa.com>                       |
+  |          Marcus Deglos <marcus@deglos.com>                           |
   +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_GEOSPATIAL_H
 #define PHP_GEOSPATIAL_H
@@ -25,11 +26,11 @@ extern zend_module_entry geospatial_module_entry;
 #define phpext_geospatial_ptr &geospatial_module_entry
 
 #ifdef PHP_WIN32
-#	define PHP_GEOSPATIAL_API __declspec(dllexport)
+# define PHP_GEOSPATIAL_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
-#	define PHP_GEOSPATIAL_API __attribute__ ((visibility("default")))
+# define PHP_GEOSPATIAL_API __attribute__ ((visibility("default")))
 #else
-#	define PHP_GEOSPATIAL_API
+# define PHP_GEOSPATIAL_API
 #endif
 
 #ifdef ZTS
@@ -71,6 +72,7 @@ typedef struct {
  *  The WGS84 elipsoid semi major axes
  */
 const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142};
+
 /**
  *  The Airy 1830 elipsoid semi major axes
  */
@@ -89,6 +91,7 @@ const geo_helmert_constants wgs84_osgb36 = {
   -0.2470,
   -0.8421
 };
+
 /**
  *  The values of the 7 variables for performing helmert transformation between
  *  osgb36 and wgs84 -1 * the values for the reverse transformation
@@ -130,7 +133,7 @@ PHP_FUNCTION(dms_to_decimal);
 PHP_FUNCTION(decimal_to_dms);
 PHP_FUNCTION(rdp_simplify);
 
-#endif	/* PHP_GEOSPATIAL_H */
+#endif /* PHP_GEOSPATIAL_H */
 
 /*
  * Local variables:

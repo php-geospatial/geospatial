@@ -6,7 +6,15 @@ Check the haversine function returns the correct distance between London and Edi
 precision=14
 --FILE--
 <?php 
-echo haversine(51.5171, 0.1062, 55.9500, 3.2200);
+$from = array(
+	'type' => 'Point',
+	'coordinates' => array( 0.1062, 51.5171 )
+);
+$to = array(
+	'type' => 'Point',
+	'coordinates' => array( 3.2200, 55.9500 )
+);
+echo haversine($from, $to);
 /*
 	Test the haversine distance between London and Edinburgh.
 	

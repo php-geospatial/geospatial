@@ -4,12 +4,15 @@ haversine() function - basic test for haversine forumla
 precision=15
 --FILE--
 <?php
-$lat1 = 39.06546;
-$lon1 = -104.88544;
-   
-$lat2 = $lat1;
-$lon2 = -104.80;
-var_dump(haversine($lat1, $lon1, $lat2, $lon2));
+$from = array(
+	'type' => 'Point',
+	'coordinates' => array( -104.88544, 39.06546 )
+);
+$to = array(
+	'type' => 'Point',
+	'coordinates' => array( -104.80, 39.06546 )
+);
+var_dump(haversine($to, $from));
 ?>
 --EXPECTF--
 float(7.384698392931%d)

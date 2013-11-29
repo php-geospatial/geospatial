@@ -6,12 +6,21 @@ WGS84 to OSGB36
 $lat = dms_to_decimal(53, 14, 10.5);
 $long = dms_to_decimal(-2, 18, 25.7);
 
-$polar = transform_datum($lat, $long, GEO_WGS84, GEO_AIRY_1830);
+$from = array('type' => 'Point', 'coordinates' => array( $long, $lat ) );
 
-echo round($polar['lat'] ,6),PHP_EOL;
-echo round($polar['long'] ,6),PHP_EOL;
-echo round($polar['height'] ,3),PHP_EOL;
+$polar = transform_datum($from, GEO_WGS84, GEO_AIRY_1830);
+
+var_dump($polar);
+?>
 --EXPECT--
-53.235974
--2.305717
--25.649
+array(2) {
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(-2.3057171628534)
+    [1]=>
+    float(53.235974015543)
+  }
+}
