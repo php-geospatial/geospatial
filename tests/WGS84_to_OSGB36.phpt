@@ -15,6 +15,7 @@ $polar = transform_datum($coordinate, GEO_WGS84, GEO_AIRY_1830);
 
 echo round($polar['coordinates'][1], 8),PHP_EOL;
 echo round($polar['coordinates'][0], 8),PHP_EOL;
+?>
 --EXPECT--
 53.38334018
 -1.46541628
