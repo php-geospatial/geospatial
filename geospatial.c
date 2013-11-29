@@ -385,13 +385,14 @@ PHP_FUNCTION(decimal_to_dms)
 }
 /* }}} */
 
-/* {{{ proto helmert(double x, double y, double z [, long from_reference_ellipsoid, long to_reference_ellipsoid])
- * Convert polar ones (latitude, longitude) tp cartesian co-ordiantes (x, y, z)  */
+/* {{{ proto array helmert(double x, double y, double z [, long from_reference_ellipsoid, long to_reference_ellipsoid])
+ * Convert cartesian co-ordinates between reference elipsoids  */
 PHP_FUNCTION(helmert)
 {
 	double x, y, z;
 	geo_cartesian point;
-	long from_reference_ellipsoid, to_reference_ellipsoid;
+	long from_reference_ellipsoid = 0, to_reference_ellipsoid = 0;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
 		return;
 	}
