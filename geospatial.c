@@ -37,6 +37,13 @@ ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 4)
 	ZEND_ARG_INFO(0, radius)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(vincenty_args, 0, 0, 3)
+	ZEND_ARG_INFO(0, fromLatitude)
+	ZEND_ARG_INFO(0, fromLongitude)
+	ZEND_ARG_INFO(0, toLatitude)
+	ZEND_ARG_INFO(0, toLongitude)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(fraction_along_gc_line_args, 0, 0, 3)
 	ZEND_ARG_INFO(0, geoJsonPoint1)
 	ZEND_ARG_INFO(0, geoJsonPoint2)
@@ -100,6 +107,7 @@ const zend_function_entry geospatial_functions[] = {
 	PHP_FE(transform_datum, transform_datum_args)
 	PHP_FE(dms_to_decimal, dms_to_decimal_args)
 	PHP_FE(decimal_to_dms, decimal_to_dms_args)
+	PHP_FE(vincenty, vincenty_args)
 	PHP_FE(rdp_simplify, rdp_simplify_args)
 	/* End of functions */
 	{ NULL, NULL, NULL }
@@ -229,17 +237,60 @@ double php_geo_haversine(double from_lat, double from_long, double to_lat, doubl
 	return result;
 }
 
+
 geo_ellipsoid get_ellipsoid(long ellipsoid_const)
 {
 	switch (ellipsoid_const) {
 		case GEO_AIRY_1830:
 			return airy_1830;
-			break;
 		case GEO_WGS84:
 		default:
 			return wgs84;
-			break;
 	}
+}
+
+double php_geo_vincenty(double from_lat, double from_long, double to_lat, double to_long, geo_ellipsoid eli)
+{
+	double U1, U2, L, lambda, lambdaP;
+	double sinSigma, cosSigma, sigma, sinLambda, cosLambda;
+	double sinU1, sinU2, cosU1, cosU2;
+	double sinAlpha, cos2Alpha;
+	double cosof2sigma, A, B, C, uSq, deltaSigma, s;
+	int loopLimit = 100;
+	double precision = 0.000000000001;
+	
+	U1 = atan((1.0 - eli.f) * tan(from_lat));
+	U2 = atan((1.0 - eli.f) * tan(to_lat));
+	L = to_long - from_long;
+	sinU1 = sin(U1);
+	cosU1 = cos(U1);
+	sinU2 = sin(U2);
+	cosU2 = cos(U2);
+	lambda = L;
+	do {
+		sinLambda = sin(lambda);
+		cosLambda = cos(lambda);
+		sinSigma = sqrt((cosU2*sinLambda) * (cosU2*sinLambda) + 
+      (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+		cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+		sigma = atan2(sinSigma, cosSigma);
+		sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+		cos2Alpha = 1.0 - sinAlpha * sinAlpha;
+		cosof2sigma = cosSigma - 2.0 * sinU1 * sinU2 / cos2Alpha;
+		C = eli.f / 16.0 * cos2Alpha * (4.0 + eli.f * (4.0 - 3.0 * cos2Alpha));
+		lambdaP = lambda;
+		lambda = L + (1.0 - C) * eli.f * sinAlpha *
+      (sigma + C*sinSigma*(cosof2sigma+C*cosSigma*(-1.0 + 2.0 *cosof2sigma*cosof2sigma)));
+		--loopLimit;
+	} while (fabs(lambda -  lambdaP) > precision && loopLimit > 0);
+	uSq = cos2Alpha * (eli.a * eli.a - eli.b * eli.b) / (eli.b * eli.b);
+	A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)));
+	B = uSq / 1024.0 * ( 256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)));
+	deltaSigma = B * sinSigma * (cosof2sigma+B/4.0 * (cosSigma * (-1.0 + 2.0 *cosof2sigma*cosof2sigma)-
+    B / 6.0 * cosof2sigma * (-3.0 + 4.0 *sinSigma*sinSigma) * (-3.0 + 4.0 *cosof2sigma*cosof2sigma)));
+	s = eli.b * A * (sigma - deltaSigma);
+	s = floor(s * 1000) / 1000;
+	return s;
 }
 
 geo_helmert_constants get_helmert_constants(long from, long to)
@@ -247,11 +298,9 @@ geo_helmert_constants get_helmert_constants(long from, long to)
 	switch (from - to) {
 		case 1:
 			return osgb36_wgs84;
-			break;
 		default:
 		case -1:
 			return wgs84_osgb36;
-			break;
 	}
 }
 
@@ -499,6 +548,19 @@ PHP_FUNCTION(haversine)
 	RETURN_DOUBLE(php_geo_haversine(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD) * radius);
 }
 /* }}} */
+
+PHP_FUNCTION(vincenty)
+{
+	double from_lat, from_long, to_lat, to_long;
+	double radius = GEO_EARTH_RADIUS;
+	long reference_ellipsoid;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd|l", &from_lat, &from_long, &to_lat, &to_long, &reference_ellipsoid) == FAILURE) {
+		return;
+	}
+	geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
+	RETURN_DOUBLE(php_geo_vincenty(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD, eli));
+}
 
 void php_geo_fraction_along_gc_line(double from_lat, double from_long, double to_lat, double to_long, double fraction, double radius, double *res_lat, double *res_long)
 {
