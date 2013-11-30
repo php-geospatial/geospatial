@@ -531,7 +531,7 @@ PHP_FUNCTION(transform_datum)
 /* }}} */
 
 /* {{{ proto double haversine(GeoJSONPoint from, GeoJSONPoint to [, double radius ])
- * Calculates the greater circle distance between the two lattitude/longitude pairs */
+ * Calculates the greater circle distance between two points */
 PHP_FUNCTION(haversine)
 {
 	double radius = GEO_EARTH_RADIUS;
@@ -549,18 +549,25 @@ PHP_FUNCTION(haversine)
 }
 /* }}} */
 
+/* {{{ proto double vincenty(GeoJSONPoint from, GeoJSONPoint to [, long reference_ellipsoid ])
+ * Calculates the distance between two points */
 PHP_FUNCTION(vincenty)
 {
+	zval   *from_geojson, *to_geojson;
 	double from_lat, from_long, to_lat, to_long;
-	double radius = GEO_EARTH_RADIUS;
-	long reference_ellipsoid;
+	long reference_ellipsoid = GEO_WGS84;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dddd|l", &from_lat, &from_long, &to_lat, &to_long, &reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa|l", &from_geojson, &to_geojson, &reference_ellipsoid) == FAILURE) {
 		return;
 	}
+
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
+
 	geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
 	RETURN_DOUBLE(php_geo_vincenty(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD, eli));
 }
+/* }}} */
 
 void php_geo_fraction_along_gc_line(double from_lat, double from_long, double to_lat, double to_long, double fraction, double radius, double *res_lat, double *res_long)
 {
