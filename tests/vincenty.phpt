@@ -6,7 +6,17 @@ $flindersPeakLat = dms_to_decimal(-37, 57, 3.72030);
 $flindersPeakLong = dms_to_decimal(144, 25, 29.52440);
 $buninyongLat = dms_to_decimal(-37, 39, 10.15610);
 $buninyongLong = dms_to_decimal(143, 55, 35.38390);
-echo vincenty($flindersPeakLat, $flindersPeakLong, $buninyongLat, $buninyongLong), 'm';
+
+$flinders = array(
+	'type' => 'Point',
+	'coordinates' => array( $flindersPeakLong, $flindersPeakLat )
+);
+$buninyong = array(
+	'type' => 'Point',
+	'coordinates' => array( $buninyongLong, $buninyongLat )
+);
+var_dump(vincenty($flinders, $buninyong));
 ?>
---EXPECT--
-54972.271m
+--EXPECTF--
+54972.271
+float(54972.2%d)
