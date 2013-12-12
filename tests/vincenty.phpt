@@ -20,4 +20,4 @@ $buninyong = array(
 var_dump(vincenty($flinders, $buninyong));
 ?>
 --EXPECTF--
-float(54972.271)
+float(54972.2%d)
