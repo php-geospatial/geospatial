@@ -38,7 +38,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(vincenty_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, from_geojson)
 	ZEND_ARG_INFO(0, to_geojson)
-	ZEND_ARG_INFO(0, to_geojson)
+	ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(fraction_along_gc_line_args, 0, 0, 3)
