@@ -29,24 +29,21 @@
 #include "php_geospatial.h"
 #include "geo_array.h"
 
-ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 4)
-	ZEND_ARG_INFO(0, fromLatitude)
-	ZEND_ARG_INFO(0, fromLongitude)
-	ZEND_ARG_INFO(0, toLatitude)
-	ZEND_ARG_INFO(0, toLongitude)
+ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, geoJsonPointFrom)
+	ZEND_ARG_INFO(0, geoJsonPointTo)
 	ZEND_ARG_INFO(0, radius)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(vincenty_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, fromLatitude)
-	ZEND_ARG_INFO(0, fromLongitude)
-	ZEND_ARG_INFO(0, toLatitude)
-	ZEND_ARG_INFO(0, toLongitude)
+ZEND_BEGIN_ARG_INFO_EX(vincenty_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, geoJsonPointFrom)
+	ZEND_ARG_INFO(0, geoJsonPointTo)
+	ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(fraction_along_gc_line_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, geoJsonPoint1)
-	ZEND_ARG_INFO(0, geoJsonPoint2)
+	ZEND_ARG_INFO(0, geoJsonPointFrom)
+	ZEND_ARG_INFO(0, geoJsonPointTo)
 	ZEND_ARG_INFO(0, fraction)
 	ZEND_ARG_INFO(0, radius)
 ZEND_END_ARG_INFO()

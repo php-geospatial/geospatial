@@ -1,5 +1,7 @@
 --TEST--
 Test for "Vincenty" distance between FlindersPeak and Buninyong
+--INI--
+precision=15
 --FILE--
 <?php
 $flindersPeakLat = dms_to_decimal(-37, 57, 3.72030);
@@ -18,5 +20,4 @@ $buninyong = array(
 var_dump(vincenty($flinders, $buninyong));
 ?>
 --EXPECTF--
-54972.271
-float(54972.2%d)
+float(54972.271)
