@@ -48,6 +48,12 @@ ZEND_BEGIN_ARG_INFO_EX(fraction_along_gc_line_args, 0, 0, 3)
 	ZEND_ARG_INFO(0, radius)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(initial_bearing_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, geoJsonPointFrom)
+	ZEND_ARG_INFO(0, geoJsonPointTo)
+	ZEND_ARG_INFO(0, radius)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(helmert_args, 0, 0, 3)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
@@ -97,6 +103,7 @@ ZEND_END_ARG_INFO()
  */
 const zend_function_entry geospatial_functions[] = {
 	PHP_FE(haversine, haversine_args)
+	PHP_FE(initial_bearing, initial_bearing_args)
 	PHP_FE(fraction_along_gc_line, fraction_along_gc_line_args)
 	PHP_FE(helmert, helmert_args)
 	PHP_FE(polar_to_cartesian, polar_to_cartesian_args)
@@ -610,6 +617,47 @@ PHP_FUNCTION(fraction_along_gc_line)
 	);
 
 	retval_point_from_coordinates(return_value, res_long / GEO_DEG_TO_RAD, res_lat / GEO_DEG_TO_RAD);
+}
+/* }}} */
+
+double php_initial_bearing(double from_lat, double from_long, double to_lat, double to_long)
+{
+/*
+var y = Math.sin(dLon) * Math.cos(lat2);
+var x = Math.cos(lat1)*Math.sin(lat2) -
+        Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+var brng = Math.atan2(y, x).toDeg();
+*/
+	double x, y;
+
+	y = sin(to_long - from_long) * cos(to_lat);
+	x = cos(from_lat) * sin(to_lat) - sin(from_lat) * cos(to_lat) * cos(to_long - to_long);
+
+	return atan2(y, x);
+}
+
+/* {{{ proto float initial_bearing(GeoJSONPoint from, GeoJSONPoint to)
+   Calculates the initial bearing to from from to to. */
+PHP_FUNCTION(initial_bearing)
+{
+	zval   *from_geojson, *to_geojson;
+	double from_lat, from_long, to_lat, to_long, bearing;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &from_geojson, &to_geojson) == FAILURE) {
+		return;
+	}
+
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
+
+	bearing = php_initial_bearing(
+		from_lat * GEO_DEG_TO_RAD,
+		from_long * GEO_DEG_TO_RAD,
+		to_lat * GEO_DEG_TO_RAD,
+		to_long * GEO_DEG_TO_RAD
+	);
+
+	RETURN_DOUBLE(bearing / GEO_DEG_TO_RAD);
 }
 /* }}} */
 

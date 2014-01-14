@@ -129,6 +129,7 @@ PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
 PHP_FUNCTION(haversine);
+PHP_FUNCTION(initial_bearing);
 PHP_FUNCTION(fraction_along_gc_line);
 PHP_FUNCTION(helmert);
 PHP_FUNCTION(polar_to_cartesian);
