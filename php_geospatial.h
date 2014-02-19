@@ -114,9 +114,9 @@ const geo_helmert_constants osgb36_wgs84 = {
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
  * Calculate the radius using WGS-84's equatorial radius of
- * 6,378,1370m
+ * 6,378,137.0m
  */
-#define GEO_EARTH_RADIUS 6378.137
+#define GEO_EARTH_RADIUS 6378137.0
 #define GEO_SEC_IN_DEG 3600
 
 #define GEO_WGS84 0x0001

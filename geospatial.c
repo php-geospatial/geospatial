@@ -535,7 +535,7 @@ PHP_FUNCTION(transform_datum)
 /* }}} */
 
 /* {{{ proto double haversine(GeoJSONPoint from, GeoJSONPoint to [, double radius ])
- * Calculates the greater circle distance between two points */
+ * Calculates the greater circle distance between two points in m */
 PHP_FUNCTION(haversine)
 {
 	double radius = GEO_EARTH_RADIUS;
@@ -554,7 +554,7 @@ PHP_FUNCTION(haversine)
 /* }}} */
 
 /* {{{ proto double vincenty(GeoJSONPoint from, GeoJSONPoint to [, long reference_ellipsoid ])
- * Calculates the distance between two points */
+ * Calculates the distance between two points in m */
 PHP_FUNCTION(vincenty)
 {
 	zval   *from_geojson, *to_geojson;

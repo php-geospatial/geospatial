@@ -15,4 +15,4 @@ $to = array(
 var_dump(haversine($to, $from));
 ?>
 --EXPECTF--
-float(7.384698392931%d)
+float(7384.698392931%d)
