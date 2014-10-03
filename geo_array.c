@@ -29,11 +29,27 @@ geo_array *geo_array_ctor(int element_count)
 
 	tmp = malloc(sizeof(geo_array));
 	tmp->count = element_count;
+	tmp->allocated = element_count;
 	tmp->status = calloc(1, element_count);
 	tmp->x = (double*) calloc(1, element_count * sizeof(double));
 	tmp->y = (double*) calloc(1, element_count * sizeof(double));
 
 	return tmp;
+}
+
+void geo_array_add(geo_array *points, double lat, double lon)
+{
+	if (points->count >= points->allocated) {
+		points->allocated = 1 + (points->allocated * 2);
+		points->status = realloc(points->status, points->allocated);
+		points->x = (double*) realloc(points->x, points->allocated * sizeof(double));
+		points->y = (double*) realloc(points->y, points->allocated * sizeof(double));
+	}
+	points->x[points->count] = lat;
+	points->y[points->count] = lon;
+	points->status[points->count] = 1;
+
+	points->count++;
 }
 	
 void geo_array_dtor(geo_array *points)

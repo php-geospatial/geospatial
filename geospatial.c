@@ -97,6 +97,16 @@ ZEND_BEGIN_ARG_INFO_EX(rdp_simplify_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, epsilon)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(interpolate_linestring_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, GeoJSONLineString)
+	ZEND_ARG_INFO(0, epsilon)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(interpolate_polygon_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, GeoJSONPolygon)
+	ZEND_ARG_INFO(0, epsilon)
+ZEND_END_ARG_INFO()
+
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
@@ -113,6 +123,8 @@ const zend_function_entry geospatial_functions[] = {
 	PHP_FE(decimal_to_dms, decimal_to_dms_args)
 	PHP_FE(vincenty, vincenty_args)
 	PHP_FE(rdp_simplify, rdp_simplify_args)
+	PHP_FE(interpolate_linestring, interpolate_linestring_args)
+	PHP_FE(interpolate_polygon, interpolate_polygon_args)
 	/* End of functions */
 	{ NULL, NULL, NULL }
 };
@@ -186,24 +198,12 @@ void retval_point_from_coordinates(zval *return_value, double lon, double lat)
 	add_assoc_zval_ex(return_value, "coordinates", sizeof("coordinates"), coordinates);
 }
 
-int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
+static int parse_point_pair(zval *coordinates, double *lon, double *lat)
 {
-	zval      **type, **coordinates, **z_lon, **z_lat;
 	HashTable *coords;
+	zval **z_lon, **z_lat;
 
-	if (zend_hash_find(HASH_OF(point), "type", sizeof("type"), (void**) &type) != SUCCESS) {
-		return 0;
-	}
-	if (Z_TYPE_PP(type) != IS_STRING || strcmp(Z_STRVAL_PP(type), "Point") != 0) {
-		return 0;
-	}
-	if (zend_hash_find(HASH_OF(point), "coordinates", sizeof("coordinates"), (void**) &coordinates) != SUCCESS) {
-		return 0;
-	}
-	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
-		return 0;
-	}
-	coords = HASH_OF(*coordinates);
+	coords = HASH_OF(coordinates);
 	if (coords->nNumOfElements != 2) {
 		return 0;
 	}
@@ -218,6 +218,26 @@ int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
 	*lon = Z_DVAL_PP(z_lon);
 	*lat = Z_DVAL_PP(z_lat);
 	return 1;
+}
+
+int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
+{
+	zval **type, **coordinates;
+
+	if (zend_hash_find(HASH_OF(point), "type", sizeof("type"), (void**) &type) != SUCCESS) {
+		return 0;
+	}
+	if (Z_TYPE_PP(type) != IS_STRING || strcmp(Z_STRVAL_PP(type), "Point") != 0) {
+		return 0;
+	}
+	if (zend_hash_find(HASH_OF(point), "coordinates", sizeof("coordinates"), (void**) &coordinates) != SUCCESS) {
+		return 0;
+	}
+	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
+		return 0;
+	}
+
+	return parse_point_pair(*coordinates, lon, lat);
 }
 
 /* }}} */
@@ -516,7 +536,9 @@ PHP_FUNCTION(transform_datum)
 		return;
 	}
 
-	geojson_point_to_lon_lat(geojson, &longitude, &latitude);
+	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude)) {
+		RETURN_FALSE;
+	}
 
 	geo_ellipsoid eli_from = get_ellipsoid(from_reference_ellipsoid);
 	geo_ellipsoid eli_to = get_ellipsoid(to_reference_ellipsoid);
@@ -630,8 +652,8 @@ var brng = Math.atan2(y, x).toDeg();
 */
 	double x, y;
 
-	y = sin(to_long - from_long) * cos(to_lat);
-	x = cos(from_lat) * sin(to_lat) - sin(from_lat) * cos(to_lat) * cos(to_long - to_long);
+	y = sin(fabs(to_long - from_long)) * cos(to_lat);
+	x = (cos(from_lat) * sin(to_lat)) - (sin(from_lat) * cos(to_lat) * cos(fabs(to_long - from_long)));
 
 	return atan2(y, x);
 }
@@ -667,7 +689,7 @@ geo_array *geo_hashtable_to_array(zval *array)
 	int element_count;
 	HashPosition pos;
 	zval **entry;
-	zval  **z_lon, **z_lat;
+	double lon, lat;
 	int   i = 0;
 
 	element_count = zend_hash_num_elements(Z_ARRVAL_P(array));
@@ -676,24 +698,12 @@ geo_array *geo_hashtable_to_array(zval *array)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
 
-		if (Z_TYPE_PP(entry) != IS_ARRAY) {
+		if (!parse_point_pair(*entry, &lon, &lat)) {
 			goto failure;
 		}
-		if (zend_hash_num_elements(Z_ARRVAL_PP(entry)) != 2)
-		{
-			goto failure;
-		}
-		if (zend_hash_index_find(HASH_OF(*entry), 0, (void**) &z_lon) != SUCCESS) {
-			return 0;
-		}
-		if (zend_hash_index_find(HASH_OF(*entry), 1, (void**) &z_lat) != SUCCESS) {
-			return 0;
-		}
-		convert_to_double_ex(z_lon);
-		convert_to_double_ex(z_lat);
 
-		tmp->x[i] = Z_DVAL_PP(z_lon);
-		tmp->y[i] = Z_DVAL_PP(z_lat);
+		tmp->x[i] = lon;
+		tmp->y[i] = lat;
 		tmp->status[i] = 1;
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos);
@@ -705,6 +715,37 @@ geo_array *geo_hashtable_to_array(zval *array)
 failure:
 	geo_array_dtor(tmp);
 	return NULL;
+}
+
+int geojson_linestring_to_array(zval *line, geo_array **array)
+{
+	geo_array *tmp;
+	zval **type, **coordinates;
+
+	if (Z_TYPE_P(line) != IS_ARRAY) {
+		return 0;
+	}
+
+	if (zend_hash_find(HASH_OF(line), "type", sizeof("type"), (void**) &type) != SUCCESS) {
+		return 0;
+	}
+	if (Z_TYPE_PP(type) != IS_STRING || strcmp(Z_STRVAL_PP(type), "Linestring") != 0) {
+		return 0;
+	}
+	if (zend_hash_find(HASH_OF(line), "coordinates", sizeof("coordinates"), (void**) &coordinates) != SUCCESS) {
+		return 0;
+	}
+	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
+		return 0;
+	}
+
+	tmp = geo_hashtable_to_array(*coordinates);
+	if (tmp && array) {
+		*array = tmp;
+		return 1;
+	}
+
+	return 0;
 }
 
 double rdp_find_perpendicular_distable(double pX, double pY, double p1X, double p1Y, double p2X, double p2Y)
@@ -783,6 +824,118 @@ PHP_FUNCTION(rdp_simplify)
 
 	points = geo_hashtable_to_array(points_array);
 	rdp_simplify(points, epsilon, 0, points->count - 1);
+	for (i = 0; i < points->count; i++) {
+		if (points->status[i]) {
+			MAKE_STD_ZVAL(pair);
+			array_init(pair);
+			add_next_index_double(pair, points->x[i]);
+			add_next_index_double(pair, points->y[i]);
+			add_next_index_zval(return_value, pair);
+		}
+	}
+
+	geo_array_dtor(points);
+}
+/* }}} */
+
+static geo_array *interpolate_line(geo_array *points, double epsilon)
+{
+	int i;
+	geo_array *new_array;
+	double     dx, dy, distance, step_size, res_lat, res_long, fraction;
+
+	new_array = geo_array_ctor(0);
+
+	for (i = 0; i < points->count - 1; i++) {
+		dx = fabs(points->x[i] - points->x[i + 1]);
+		dy = fabs(points->y[i] - points->y[i + 1]);
+		distance = sqrt((dx * dx) + (dy * dy));
+		if (distance > epsilon) {
+			step_size = epsilon/distance;
+			for (fraction = 0; fraction < 1; fraction += step_size) {
+				php_geo_fraction_along_gc_line(
+					points->y[i] * GEO_DEG_TO_RAD,
+					points->x[i] * GEO_DEG_TO_RAD,
+					points->y[i + 1] * GEO_DEG_TO_RAD,
+					points->x[i + 1] * GEO_DEG_TO_RAD,
+					fraction, GEO_EARTH_RADIUS,
+					&res_lat, &res_long
+				);
+				geo_array_add(new_array, res_long / GEO_DEG_TO_RAD, res_lat / GEO_DEG_TO_RAD);
+			}
+		} else {
+			geo_array_add(new_array, points->x[i], points->y[i]);
+		}
+	}
+	geo_array_add(new_array, points->x[points->count - 1], points->y[points->count - 1]);
+
+	return new_array;
+}
+
+/* {{{ proto array interpolate_linestring(GeoJSONLineString line, float epsilon)
+   Interpolates lines with intermediate points to show line segments as GC lines */
+PHP_FUNCTION(interpolate_linestring)
+{
+	zval      *line;
+	double     epsilon;
+	geo_array *points;
+	int        i;
+	zval      *pair;
+	geo_array *new_array;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd", &line, &epsilon) == FAILURE) {
+		return;
+	}
+
+	if (!geojson_linestring_to_array(line, &points)) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	new_array = interpolate_line(points, epsilon);
+
+	for (i = 0; i < new_array->count; i++) {
+		if (new_array->status[i]) {
+			MAKE_STD_ZVAL(pair);
+			array_init(pair);
+			add_next_index_double(pair, new_array->x[i]);
+			add_next_index_double(pair, new_array->y[i]);
+			add_next_index_zval(return_value, pair);
+		}
+	}
+
+	geo_array_dtor(points);
+	geo_array_dtor(new_array);
+}
+/* }}} */
+
+/* {{{ proto array interpolate_polygon(GeoJSONPolygon polygon, float epsilon)
+   Interpolates polygons with intermediate points to show line segments as GC lines */
+PHP_FUNCTION(interpolate_polygon)
+{
+	zval      *polygon;
+	double     epsilon;
+	geo_array *points;
+	int        i;
+	zval      *pair;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd", &polygon, &epsilon) == FAILURE) {
+		return;
+	}
+
+	if (!Z_TYPE_P(polygon) == IS_ARRAY) {
+		return;
+	}
+
+	if (!geojson_linestring_to_array(polygon, &points)) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	rdp_simplify(points, epsilon, 0, points->count - 1);
+
 	for (i = 0; i < points->count; i++) {
 		if (points->status[i]) {
 			MAKE_STD_ZVAL(pair);

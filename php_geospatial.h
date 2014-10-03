@@ -139,6 +139,8 @@ PHP_FUNCTION(dms_to_decimal);
 PHP_FUNCTION(decimal_to_dms);
 PHP_FUNCTION(vincenty);
 PHP_FUNCTION(rdp_simplify);
+PHP_FUNCTION(interpolate_linestring);
+PHP_FUNCTION(interpolate_polygon);
 
 #endif /* PHP_GEOSPATIAL_H */
 

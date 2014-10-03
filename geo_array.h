@@ -24,7 +24,9 @@ typedef struct geo_array {
 	double  *y;
 	char    *status;
 	int      count;
+	int      allocated;
 } geo_array;
 
 geo_array *geo_array_ctor(int element_count);
+void geo_array_add(geo_array *points, double lat, double lon);
 void geo_array_dtor(geo_array *points);
