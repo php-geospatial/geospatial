@@ -186,29 +186,60 @@ PHP_MINFO_FUNCTION(geospatial)
 }
 /* }}} */
 
+/* {{{ Version compat helpers */
+#if PHP_VERSION_ID >= 70000
+# define ADD_STRING(zv, name, val) add_assoc_string_ex(zv, name, sizeof(name)-1, val);
+# define GEOSPAT_MAKE_STD_ZVAL(zv)  zv = ecalloc(sizeof(zval), 1);
+#else
+# define ADD_STRING(zv, name, val) add_assoc_string_ex(zv, name, sizeof(name), val, 1);
+# define GEOSPAT_MAKE_STD_ZVAL(zv)  MAKE_STD_ZVAL(zv)
+#endif
+/* }}} */
+
 /* {{{ Helpers */
 void retval_point_from_coordinates(zval *return_value, double lon, double lat)
 {
 	zval *coordinates;
 
 	array_init(return_value);
-	MAKE_STD_ZVAL(coordinates);
+	GEOSPAT_MAKE_STD_ZVAL(coordinates);
 	array_init(coordinates);
-	add_assoc_string_ex(return_value, "type", sizeof("type"), "Point", 1);
+	ADD_STRING(return_value, "type", "Point");
 	add_next_index_double(coordinates, lon);
 	add_next_index_double(coordinates, lat);
+#if PHP_VERSION_ID >= 70000
+	add_assoc_zval_ex(return_value, "coordinates", sizeof("coordinates") - 1, coordinates);
+	efree(coordinates);
+#else
 	add_assoc_zval_ex(return_value, "coordinates", sizeof("coordinates"), coordinates);
+#endif
 }
 
 static int parse_point_pair(zval *coordinates, double *lon, double *lat)
 {
 	HashTable *coords;
+#if PHP_VERSION_ID >= 70000
+	zval *z_lon, *z_lat;
+#else
 	zval **z_lon, **z_lat;
+#endif
 
 	coords = HASH_OF(coordinates);
 	if (coords->nNumOfElements != 2) {
 		return 0;
 	}
+#if PHP_VERSION_ID >= 70000
+	if ((z_lon = zend_hash_index_find(coords, 0)) == NULL) {
+		return 0;
+	}
+	if ((z_lat = zend_hash_index_find(coords, 1)) == NULL) {
+		return 0;
+	}
+	convert_to_double_ex(z_lon);
+	convert_to_double_ex(z_lat);
+	*lon = Z_DVAL_P(z_lon);
+	*lat = Z_DVAL_P(z_lat);
+#else
 	if (zend_hash_index_find(coords, 0, (void**) &z_lon) != SUCCESS) {
 		return 0;
 	}
@@ -219,11 +250,29 @@ static int parse_point_pair(zval *coordinates, double *lon, double *lat)
 	convert_to_double_ex(z_lat);
 	*lon = Z_DVAL_PP(z_lon);
 	*lat = Z_DVAL_PP(z_lat);
+#endif
 	return 1;
 }
 
 int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
 {
+#if PHP_VERSION_ID >= 70000
+	zval *type, *coordinates;
+
+	if ((type = zend_hash_str_find(HASH_OF(point), "type", sizeof("type") - 1)) == NULL) {
+		return 0;
+	}
+	if (Z_TYPE_P(type) != IS_STRING || strcmp(Z_STRVAL_P(type), "Point") != 0) {
+		return 0;
+	}
+	if ((coordinates = zend_hash_str_find(HASH_OF(point), "coordinates", sizeof("coordinates") - 1)) == NULL) {
+		return 0;
+	}
+	if (Z_TYPE_P(coordinates) != IS_ARRAY) {
+		return 0;
+	}
+	return parse_point_pair(coordinates, lon, lat);
+#else
 	zval **type, **coordinates;
 
 	if (zend_hash_find(HASH_OF(point), "type", sizeof("type"), (void**) &type) != SUCCESS) {
@@ -238,8 +287,8 @@ int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
 	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
 		return 0;
 	}
-
 	return parse_point_pair(*coordinates, lon, lat);
+#endif
 }
 
 /* }}} */
@@ -410,7 +459,11 @@ PHP_FUNCTION(dms_to_decimal)
 	double degrees, minutes, sign;
 	double seconds, decimal;
 	char *direction = "";
+#if PHP_VERSION_ID >= 70000
+	size_t direction_len;
+#else
 	int direction_len;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|s", &degrees, &minutes, &seconds, &direction, &direction_len) == FAILURE) {
 		return;
@@ -436,7 +489,11 @@ PHP_FUNCTION(decimal_to_dms)
 	int degrees, minutes;
 	char *direction;
 	char *coordinate;
+#if PHP_VERSION_ID >= 70000
+	size_t coordinate_len;
+#else
 	int coordinate_len;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ds", &decimal, &coordinate, &coordinate_len) == FAILURE) {
 		return;
@@ -456,7 +513,7 @@ PHP_FUNCTION(decimal_to_dms)
 	add_assoc_long(return_value, "degrees", degrees);
 	add_assoc_long(return_value, "minutes", minutes);
 	add_assoc_double(return_value, "seconds", seconds);
-	add_assoc_string(return_value, "direction", direction, 1);
+	ADD_STRING(return_value, "direction", direction);
 }
 /* }}} */
 
@@ -690,17 +747,28 @@ geo_array *geo_hashtable_to_array(zval *array)
 	geo_array *tmp;
 	int element_count;
 	HashPosition pos;
+#if PHP_VERSION_ID >= 70000
+	zval *entry;
+#else
 	zval **entry;
+#endif
 	double lon, lat;
 	int   i = 0;
 
 	element_count = zend_hash_num_elements(Z_ARRVAL_P(array));
 	tmp = geo_array_ctor(element_count);
 
+#if PHP_VERSION_ID >= 70000
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
+
+		if (!parse_point_pair(entry, &lon, &lat)) {
+#else
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
 
 		if (!parse_point_pair(*entry, &lon, &lat)) {
+#endif
+
 			goto failure;
 		}
 
@@ -710,7 +778,11 @@ geo_array *geo_hashtable_to_array(zval *array)
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos);
 		i++;
+#if PHP_VERSION_ID >= 70000
+	} ZEND_HASH_FOREACH_END();
+#else
 	}
+#endif
 
 	return tmp;
 
@@ -722,6 +794,28 @@ failure:
 int geojson_linestring_to_array(zval *line, geo_array **array)
 {
 	geo_array *tmp;
+#if PHP_VERSION_ID >= 70000
+	zval *type, *coordinates;
+
+	if (Z_TYPE_P(line) != IS_ARRAY) {
+		return 0;
+	}
+
+	if ((type = zend_hash_str_find(HASH_OF(line), "type", sizeof("type") - 1)) == NULL) {
+		return 0;
+	}
+	if (Z_TYPE_P(type) != IS_STRING || strcmp(Z_STRVAL_P(type), "Linestring") != 0) {
+		return 0;
+	}
+	if ((coordinates = zend_hash_str_find(HASH_OF(line), "coordinates", sizeof("coordinates") - 1)) == NULL) {
+		return 0;
+	}
+	if (Z_TYPE_P(coordinates) != IS_ARRAY) {
+		return 0;
+	}
+
+	tmp = geo_hashtable_to_array(coordinates);
+#else
 	zval **type, **coordinates;
 
 	if (Z_TYPE_P(line) != IS_ARRAY) {
@@ -742,6 +836,7 @@ int geojson_linestring_to_array(zval *line, geo_array **array)
 	}
 
 	tmp = geo_hashtable_to_array(*coordinates);
+#endif
 	if (tmp && array) {
 		*array = tmp;
 		return 1;
@@ -828,11 +923,14 @@ PHP_FUNCTION(rdp_simplify)
 	rdp_simplify(points, epsilon, 0, points->count - 1);
 	for (i = 0; i < points->count; i++) {
 		if (points->status[i]) {
-			MAKE_STD_ZVAL(pair);
+			GEOSPAT_MAKE_STD_ZVAL(pair);
 			array_init(pair);
 			add_next_index_double(pair, points->x[i]);
 			add_next_index_double(pair, points->y[i]);
 			add_next_index_zval(return_value, pair);
+#if PHP_VERSION_ID >= 70000
+			efree(pair);
+#endif
 		}
 	}
 
@@ -899,11 +997,14 @@ PHP_FUNCTION(interpolate_linestring)
 
 	for (i = 0; i < new_array->count; i++) {
 		if (new_array->status[i]) {
-			MAKE_STD_ZVAL(pair);
+			GEOSPAT_MAKE_STD_ZVAL(pair);
 			array_init(pair);
 			add_next_index_double(pair, new_array->x[i]);
 			add_next_index_double(pair, new_array->y[i]);
 			add_next_index_zval(return_value, pair);
+#if PHP_VERSION_ID >= 70000
+			efree(pair);
+#endif
 		}
 	}
 
@@ -940,11 +1041,14 @@ PHP_FUNCTION(interpolate_polygon)
 
 	for (i = 0; i < points->count; i++) {
 		if (points->status[i]) {
-			MAKE_STD_ZVAL(pair);
+			GEOSPAT_MAKE_STD_ZVAL(pair);
 			array_init(pair);
 			add_next_index_double(pair, points->x[i]);
 			add_next_index_double(pair, points->y[i]);
 			add_next_index_zval(return_value, pair);
+#if PHP_VERSION_ID >= 70000
+			efree(pair);
+#endif
 		}
 	}
 
