@@ -1,9 +1,15 @@
-# geospatial - PHP Geospatial Extension
+=====================================
+geospatial - PHP Geospatial Extension
+=====================================
 
-PHP Extension to handle common geospatial functions. The extension currently has implementations of the haversine and vincenty's formulas as well as a helmert transfomation function.
+PHP Extension to handle common geospatial functions. The extension currently
+has implementations of the Haversine and Vincenty's formulas as well as a
+Helmert transformation function.
 
-## Instalation
-----------------------------
+Instalation
+===========
+
+::
 
     git clone git@github.com:php-geospatial/geospatial.git
     cd geospatial
@@ -12,15 +18,18 @@ PHP Extension to handle common geospatial functions. The extension currently has
     make
     sudo make install
 
-    Then add the extension to an ini file e.g. /etc/php.ini
+Then add the extension to an ini file e.g. /etc/php.ini::
 
     extension = geospatial.so
 
-## Usage
+Usage
+=====
 
-The extension makes use of the geojson standard format for specying points as co-ordinates. One important thing to note about this format is that points are specied longitude **first** i.e. longitude, latitude.
+The extension makes use of the GeoJSON standard format for specifying points as
+co-ordinates. One important thing to note about this format is that points are
+specified longitude **first** i.e. longitude, latitude.
 
-e.g.
+e.g.::
 
     $greenwichObservatory = array(
         'type' => 'Point',
@@ -28,7 +37,10 @@ e.g.
     );
 
 
-### Haversine
+Haversine
+---------
+
+::
 
     $from = array(
         'type' => 'Point',
@@ -41,9 +53,12 @@ e.g.
     var_dump(haversine($to, $from));
     
 
-### Vincenty's Formula
+Vincenty's Formula
+------------------
 
-Vincenty's formula attempts to provide a more acurate distance between two points than the Haversine formula. Whereas the Haversine formula assumes a spherical earth the Vincenty method models the earth as an ellipsoid.
+Vincenty's formula attempts to provide a more accurate distance between two
+points than the Haversine formula. Whereas the Haversine formula assumes a
+spherical earth the Vincenty method models the earth as an ellipsoid::
 
     $flinders = array(
         'type' => 'Point',
@@ -56,9 +71,12 @@ Vincenty's formula attempts to provide a more acurate distance between two point
     var_dump(vincenty($flinders, $buninyong));
 
 
-### Helmert Transformation
+Helmert Transformation
+----------------------
 
-The Helmert transformation allows for the transfomation of points between different datums. It can for instance be used to convert between the WGS84 ellipsoid used by GPS systems and OSGB36 used by ordnance survey in the UK.
+The Helmert transformation allows for the transformation of points between
+different datums. It can for instance be used to convert between the WGS84
+ellipsoid used by GPS systems and OSGB36 used by ordnance survey in the UK::
 
     $greenwichObservatory = array(
         'type' => 'Point',
