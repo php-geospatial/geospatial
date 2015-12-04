@@ -215,7 +215,7 @@ void retval_point_from_coordinates(zval *return_value, double lon, double lat)
 #endif
 }
 
-static int parse_point_pair(zval *coordinates, double *lon, double *lat)
+static int parse_point_pair(zval *coordinates, double *lon, double *lat TSRMLS_DC)
 {
 	HashTable *coords;
 #if PHP_VERSION_ID >= 70000
@@ -254,7 +254,7 @@ static int parse_point_pair(zval *coordinates, double *lon, double *lat)
 	return 1;
 }
 
-int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
+int geojson_point_to_lon_lat(zval *point, double *lon, double *lat TSRMLS_DC)
 {
 #if PHP_VERSION_ID >= 70000
 	zval *type, *coordinates;
@@ -271,7 +271,7 @@ int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
 	if (Z_TYPE_P(coordinates) != IS_ARRAY) {
 		return 0;
 	}
-	return parse_point_pair(coordinates, lon, lat);
+	return parse_point_pair(coordinates, lon, lat TSRMLS_CC);
 #else
 	zval **type, **coordinates;
 
@@ -287,7 +287,7 @@ int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
 	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
 		return 0;
 	}
-	return parse_point_pair(*coordinates, lon, lat);
+	return parse_point_pair(*coordinates, lon, lat TSRMLS_CC);
 #endif
 }
 
@@ -595,7 +595,7 @@ PHP_FUNCTION(transform_datum)
 		return;
 	}
 
-	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude)) {
+	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -627,8 +627,8 @@ PHP_FUNCTION(haversine)
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
 
 	RETURN_DOUBLE(php_geo_haversine(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD) * radius);
 }
@@ -646,8 +646,8 @@ PHP_FUNCTION(vincenty)
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
 
 	geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
 	RETURN_DOUBLE(php_geo_vincenty(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD, eli));
@@ -685,8 +685,8 @@ PHP_FUNCTION(fraction_along_gc_line)
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
 
 	php_geo_fraction_along_gc_line(
 		from_lat * GEO_DEG_TO_RAD,
@@ -728,8 +728,8 @@ PHP_FUNCTION(initial_bearing)
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
 
 	bearing = php_initial_bearing(
 		from_lat * GEO_DEG_TO_RAD,
@@ -742,7 +742,7 @@ PHP_FUNCTION(initial_bearing)
 }
 /* }}} */
 
-geo_array *geo_hashtable_to_array(zval *array)
+geo_array *geo_hashtable_to_array(zval *array TSRMLS_DC)
 {
 	geo_array *tmp;
 	int element_count;
@@ -761,12 +761,12 @@ geo_array *geo_hashtable_to_array(zval *array)
 #if PHP_VERSION_ID >= 70000
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
 
-		if (!parse_point_pair(entry, &lon, &lat)) {
+		if (!parse_point_pair(entry, &lon, &lat TSRMLS_CC)) {
 #else
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
 
-		if (!parse_point_pair(*entry, &lon, &lat)) {
+		if (!parse_point_pair(*entry, &lon, &lat TSRMLS_CC)) {
 #endif
 
 			goto failure;
@@ -791,7 +791,7 @@ failure:
 	return NULL;
 }
 
-int geojson_linestring_to_array(zval *line, geo_array **array)
+int geojson_linestring_to_array(zval *line, geo_array **array TSRMLS_DC)
 {
 	geo_array *tmp;
 #if PHP_VERSION_ID >= 70000
@@ -814,7 +814,7 @@ int geojson_linestring_to_array(zval *line, geo_array **array)
 		return 0;
 	}
 
-	tmp = geo_hashtable_to_array(coordinates);
+	tmp = geo_hashtable_to_array(coordinates TSRMLS_CC);
 #else
 	zval **type, **coordinates;
 
@@ -835,7 +835,7 @@ int geojson_linestring_to_array(zval *line, geo_array **array)
 		return 0;
 	}
 
-	tmp = geo_hashtable_to_array(*coordinates);
+	tmp = geo_hashtable_to_array(*coordinates TSRMLS_CC);
 #endif
 	if (tmp && array) {
 		*array = tmp;
@@ -919,7 +919,7 @@ PHP_FUNCTION(rdp_simplify)
 
 	array_init(return_value);
 
-	points = geo_hashtable_to_array(points_array);
+	points = geo_hashtable_to_array(points_array TSRMLS_CC);
 	rdp_simplify(points, epsilon, 0, points->count - 1);
 	for (i = 0; i < points->count; i++) {
 		if (points->status[i]) {
@@ -987,7 +987,7 @@ PHP_FUNCTION(interpolate_linestring)
 		return;
 	}
 
-	if (!geojson_linestring_to_array(line, &points)) {
+	if (!geojson_linestring_to_array(line, &points TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -1031,7 +1031,7 @@ PHP_FUNCTION(interpolate_polygon)
 		return;
 	}
 
-	if (!geojson_linestring_to_array(polygon, &points)) {
+	if (!geojson_linestring_to_array(polygon, &points TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
