@@ -3,8 +3,12 @@ geospatial - PHP Geospatial Extension
 =====================================
 
 PHP Extension to handle common geospatial functions. The extension currently
-has implementations of the Haversine and Vincenty's formulas as well as a
-Helmert transformation function.
+has implementations of the Haversine and Vincenty's formulas for calculating
+distances, an initial bearing calculation function, a Helmert transformation
+function to transfer between different supported datums, conversions between
+polar and Cartesian coordinates, conversions between Degree/Minute/Seconds and
+decimal degrees, a method to simplify linear geometries, as well as a method
+to calculate intermediate points on a LineString.
 
 Instalation
 ===========
@@ -76,13 +80,89 @@ Helmert Transformation
 
 The Helmert transformation allows for the transformation of points between
 different datums. It can for instance be used to convert between the WGS84
-ellipsoid used by GPS systems and OSGB36 used by ordnance survey in the UK::
+ellipsoid (GEO_WGS84) used by GPS systems and OSGB36 (GEO_AIRY_1830) used by
+Ordnance Survey in the UK::
 
     $greenwichObservatory = array(
         'type' => 'Point',
         'coordinates' => array(-0.0014833333333333 , 51.477916666667)
     );
-    
+
     $greenwichObservatoryWGS84 = transform_datum($greenwichObservatory, GEO_WGS84, GEO_AIRY_1830);
-    
+
     var_dump($greenwichObservatoryWGS84);
+
+Converting between polar and Cartesian Coordinates
+--------------------------------------------------
+
+These two functions calculate between Polar and Cartesian Coordinates,
+with results depending on which ellipsoid you use.
+
+From Polar to Cartesian::
+
+	$lat = 53.38361111111;
+	$long = 1.4669444444;
+
+	var_dump(polar_to_cartesian($lat, $long, GEO_AIRY_1830));
+
+And back::
+
+	$x = 3810891.6734396;
+	$y = 97591.624686311;
+	$z = 5095766.3939034;
+
+	$polar = cartesian_to_polar($x, $y, $z, GEO_AIRY_1830);
+	echo round($polar['lat'], 6), PHP_EOL;
+	echo round($polar['long'], 6), PHP_EOL;
+	echo round($polar['height'], 3), PHP_EOL;
+
+Converting between Degree/Min/Sec and Decimal coordinates
+---------------------------------------------------------
+
+From decimal to dms. The second argument is either "longitude" or "latitude"::
+
+	$dms = decimal_to_dms(-1.034291666667, 'longitude');
+	var_dump($dms);
+
+Which outputs::
+
+	array(4) {
+	  ["degrees"]=> int(1)
+	  ["minutes"]=> int(2)
+	  ["seconds"]=> float(3.4500000011994)
+	  ["direction"]=> string(1) "W"
+	}
+
+And back from DMS to decimal, where the fourth argument is either "N", "S",
+"E", or "W"::
+
+	$decimal = dms_to_decimal(0, 6, 9, 'S');
+
+Which outputs::
+
+	float(-0.1025)
+
+Simplifying LineStrings
+-----------------------
+
+The ``rdp_simplify``  method implements RDP_ to simplify a LineString
+according to a certain accuracy (epsilon). As first argument it takes a
+GeoJSON LineString (in PHP variable format), and it outputs a similar
+structure but then simplified
+
+.. _RDP: https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
+
+Interpolation along a Greater Circle Line
+-----------------------------------------
+
+The ``fraction_along_gc_line`` function can be used to calculate intermediate
+points along a Greater Circle Line. For example if you need to draw lines with
+more accuracy with for example Leaflet. The function takes the start and end
+coordinates (as GeoJson Point), and calculates the intermediate point along
+those line. To calculate the point 25% from the start point to the end point,
+you would use::
+
+	$point1 = [ 'type' => 'Point', 'coordinates' => [  5, 10 ] ];
+	$point2 = [ 'type' => 'Point', 'coordinates' => [ 15, 10 ] ];
+
+	var_dump(fraction_along_gc_line($point1, $point2, 0.25));
