@@ -913,7 +913,7 @@ PHP_FUNCTION(rdp_simplify)
 		return;
 	}
 
-	if (!Z_TYPE_P(points_array) == IS_ARRAY) {
+	if (Z_TYPE_P(points_array) != IS_ARRAY) {
 		return;
 	}
 
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(interpolate_polygon)
 		return;
 	}
 
-	if (!Z_TYPE_P(polygon) == IS_ARRAY) {
+	if (Z_TYPE_P(polygon) != IS_ARRAY) {
 		return;
 	}
 
