@@ -22,6 +22,8 @@
 #ifndef PHP_GEOSPATIAL_H
 #define PHP_GEOSPATIAL_H
 
+#define PHP_GEOSPATIAL_VERSION "0.1.0"
+
 extern zend_module_entry geospatial_module_entry;
 #define phpext_geospatial_ptr &geospatial_module_entry
 

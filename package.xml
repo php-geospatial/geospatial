@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.7.1" version="2.0"
+	xmlns="http://pear.php.net/dtd/package-2.0"
+	xmlns:tasks="http://pear.php.net/dtd/tasks-1.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+ <name>geospatial</name>
+ <channel>pecl.php.net</channel>
+ <summary>PHP Extension to handle common geospatial functions</summary>
+ <description>The extension currently has implementations of the Haversine and
+ Vincenty's formulas for calculating distances, an initial bearing calculation
+ function, a Helmert transformation function to transfer between different
+ supported datums, conversions between polar and Cartesian coordinates,
+ conversions between Degree/Minute/Seconds and decimal degrees, a method to
+ simplify linear geometries, as well as a method to calculate intermediate
+ points on a LineString.</description>
+ <lead>
+  <name>Derick Rethans</name>
+  <user>derick</user>
+  <email>derick@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Michael MacClean</name>
+  <user>mgdm</user>
+  <email>mgdm@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2015-12-04</date>
+ <time>18:56:58</time>
+ <version>
+  <release>0.1.0</release>
+  <api>0.1.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+ <notes>
+Initial release on PECL (with PHP 7 support).
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="LICENSE" role="doc" />
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="geo_array.h" role="src" />
+   <file name="php_geospatial.h" role="src" />
+   <file name="geo_array.c" role="src" />
+   <file name="geospatial.c" role="src" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.4.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0b1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>geospatial</providesextension>
+ <extsrcrelease />
+ <changelog>
+ </changelog>
+</package>
+<!--
+vim:et:ts=1:sw=1
+-->

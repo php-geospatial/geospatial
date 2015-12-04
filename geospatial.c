@@ -146,7 +146,7 @@ zend_module_entry geospatial_module_entry = {
 	NULL,
 	PHP_MINFO(geospatial),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+	PHP_GEOSPATIAL_VERSION,
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -182,6 +182,7 @@ PHP_MINFO_FUNCTION(geospatial)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Geospatial functions", "enabled");
+	php_info_print_table_row(2, "Version", PHP_GEOSPATIAL_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */

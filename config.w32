@@ -1,13 +1,9 @@
 // $Id$
 // vim:ft=javascript
 
-// If your extension references something external, use ARG_WITH
-// ARG_WITH("geospatial", "for geospatial support", "no");
-
-// Otherwise, use ARG_ENABLE
-// ARG_ENABLE("geospatial", "enable geospatial support", "no");
+ARG_ENABLE("geospatial", "enable geospatial support", "no");
 
 if (PHP_GEOSPATIAL != "no") {
-	EXTENSION("geospatial", "geospatial.c");
+	EXTENSION("geospatial", "geospatial.c geo_array.c");
 }
 
