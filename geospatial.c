@@ -28,6 +28,8 @@
 #include "ext/standard/info.h"
 #include "php_geospatial.h"
 #include "geo_array.h"
+#include "Zend/zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 
 ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, geoJsonPointFrom)
@@ -224,6 +226,11 @@ static int parse_point_pair(zval *coordinates, double *lon, double *lat TSRMLS_D
 #else
 	zval **z_lon, **z_lat;
 #endif
+
+	if (Z_TYPE_P(coordinates) != IS_ARRAY) {
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Expected a coordinate pair as an array, but %s given", zend_zval_type_name(coordinates));
+		return 0;
+	}
 
 	coords = HASH_OF(coordinates);
 	if (coords->nNumOfElements != 2) {
@@ -921,6 +928,9 @@ PHP_FUNCTION(rdp_simplify)
 	array_init(return_value);
 
 	points = geo_hashtable_to_array(points_array TSRMLS_CC);
+	if (!points) {
+		return;
+	}
 	rdp_simplify(points, epsilon, 0, points->count - 1);
 	for (i = 0; i < points->count; i++) {
 		if (points->status[i]) {
