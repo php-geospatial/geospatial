@@ -36,7 +36,7 @@
   <release>beta</release>
   <api>beta</api>
  </stability>
- <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+ <license uri="http://www.php.net/license">PHP 3.01</license>
  <notes>
 Initial release on PECL (with PHP 7 support).
  </notes>
