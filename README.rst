@@ -1,6 +1,10 @@
 =====================================
 geospatial - PHP Geospatial Extension
 =====================================
+.. image:: https://travis-ci.org/php-geospatial/geospatial.svg?branch=master
+    :target: https://travis-ci.org/php-geospatial/geospatial
+.. image:: https://codecov.io/gh/php-geospatial/geospatial/branch/master/graphs/badge.svg?branch=master
+    :target: https://codecov.io/github/php-geospatial/geospatial?branch=master
 
 PHP Extension to handle common geospatial functions. The extension currently
 has implementations of the Haversine and Vincenty's formulas for calculating
