@@ -1082,7 +1082,8 @@ PHP_FUNCTION(interpolate_polygon)
 
 
 static char*
-_geohash_encode(double lat, double lng, int precision) {
+_geohash_encode(double lat, double lng, int precision)
+{
 
     char* hash;
 
@@ -1092,22 +1093,22 @@ _geohash_encode(double lat, double lng, int precision) {
 
     precision *= 5.0;
 
-    Interval lat_interval = {MAX_LAT, MIN_LAT};
-    Interval lng_interval = {MAX_LONG, MIN_LONG};
+    Interval lat_interval = { MAX_LAT, MIN_LAT };
+    Interval lng_interval = { MAX_LONG, MIN_LONG };
 
-    Interval *interval;
+    Interval* interval;
     double coord, mid;
     int is_even = 1;
     unsigned int hashChar = 0;
     int i;
-    for(i = 1; i <= precision; i++) {
+    for (i = 1; i <= precision; i++) {
 
-        if(is_even) {
+        if (is_even) {
 
             interval = &lng_interval;
             coord = lng;
-
-        } else {
+        }
+        else {
 
             interval = &lat_interval;
             coord = lat;
@@ -1116,81 +1117,78 @@ _geohash_encode(double lat, double lng, int precision) {
         mid = (interval->low + interval->high) / 2.0;
         hashChar = hashChar << 1;
 
-        if(coord > mid) {
+        if (coord > mid) {
 
             interval->low = mid;
             hashChar |= 0x01;
-
-        } else
+        }
+        else
             interval->high = mid;
 
-        if(!(i % 5)) {
+        if (!(i % 5)) {
 
             hash[(i - 1) / 5] = char_map[hashChar];
             hashChar = 0;
-
         }
 
         is_even = !is_even;
     }
 
-
     return hash;
 }
 
-
-static unsigned int index_for_char(char c, char *string) {
+static unsigned int index_for_char(char c, char* string)
+{
 
     unsigned int index = -1;
     int string_amount = strlen(string);
     int i;
-    for(i = 0; i < string_amount; i++) {
+    for (i = 0; i < string_amount; i++) {
 
-        if(c == string[i]) {
+        if (c == string[i]) {
 
             index = i;
             break;
         }
-
     }
 
     return index;
 }
 
-GeoCoord _geohash_decode(char *hash) {
+GeoCoord _geohash_decode(char* hash)
+{
 
-    GeoCoord coordinate = {0.0, 0.0};
+    GeoCoord coordinate = { 0.0, 0.0 };
     int char_amount = strlen(hash);
 
     if (char_amount) {
 
         int char_mapIndex;
-        Interval lat_interval = {MAX_LAT, MIN_LAT};
-        Interval lng_interval = {MAX_LONG, MIN_LONG};
-        Interval *interval;
+        Interval lat_interval = { MAX_LAT, MIN_LAT };
+        Interval lng_interval = { MAX_LONG, MIN_LONG };
+        Interval* interval;
 
         int is_even = 1;
         double delta;
         int i, j;
-        for(i = 0; i < char_amount; i++) {
+        for (i = 0; i < char_amount; i++) {
 
             char_mapIndex = index_for_char(hash[i], (char*)char_map);
 
             // Interpret the last 5 bits of the integer
-            for(j = 0; j < 5; j++) {
+            for (j = 0; j < 5; j++) {
 
                 interval = is_even ? &lng_interval : &lat_interval;
 
                 delta = (interval->high - interval->low) / 2.0;
 
-                if((char_mapIndex << j) & 0x0010)
+                if ((char_mapIndex << j) & 0x0010)
                     interval->low += delta;
                 else
                     interval->high -= delta;
 
                 is_even = !is_even;
             }
-
         }
 
         coordinate.latitude = lat_interval.high - ((lat_interval.high - lat_interval.low) / 2.0);
@@ -1209,41 +1207,40 @@ PHP_FUNCTION(geohash_encode)
     double lat;
     double lng;
 
-    #if PHP_MAJOR_VERSION >= 7
-        zend_long precision = 12;
-    #else 
-        long precision = 12;
-    #endif
+#if PHP_MAJOR_VERSION >= 7
+    zend_long precision = 12;
+#else
+    long precision = 12;
+#endif
 
     zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd|l", &lat, &lng, &precision);
-    char *hash;
+    char* hash;
     hash = _geohash_encode(lat, lng, precision);
-    #if PHP_MAJOR_VERSION < 7
-        RETVAL_STRING(hash, 0);
-    #else
-        RETVAL_STRING(hash);
-        efree(hash);
-    #endif
+#if PHP_MAJOR_VERSION < 7
+    RETVAL_STRING(hash, 0);
+#else
+    RETVAL_STRING(hash);
+    efree(hash);
+#endif
 }
-
 
 /* {{{ string geohash_decode( [ string $geohash ] )
  */
 PHP_FUNCTION(geohash_decode)
 {
-    char *hash;
+    char* hash;
 
-    #if PHP_MAJOR_VERSION >= 7
-        size_t hash_len;
-    #else
-        int hash_len;
-    #endif
+#if PHP_MAJOR_VERSION >= 7
+    size_t hash_len;
+#else
+    int hash_len;
+#endif
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
         return;
     }
 
-    GeoCoord area =  _geohash_decode(hash);
+    GeoCoord area = _geohash_decode(hash);
 
     array_init(return_value);
     add_assoc_double(return_value, "latitude", area.latitude);
