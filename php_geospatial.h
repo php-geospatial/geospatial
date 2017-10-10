@@ -22,7 +22,7 @@
 #ifndef PHP_GEOSPATIAL_H
 #define PHP_GEOSPATIAL_H
 
-#define PHP_GEOSPATIAL_VERSION "0.1.1-dev"
+#define PHP_GEOSPATIAL_VERSION "0.1.2"
 
 extern zend_module_entry geospatial_module_entry;
 #define phpext_geospatial_ptr &geospatial_module_entry
@@ -127,6 +127,13 @@ const geo_helmert_constants osgb36_wgs84 = {
 #define HEIGHT 24.7
 
 
+#define MAX_LAT             90.0
+#define MIN_LAT             -90.0
+
+#define MAX_LONG            180.0
+#define MIN_LONG            -180.0
+
+
 PHP_MINIT_FUNCTION(geospatial);
 PHP_MINFO_FUNCTION(geospatial);
 
@@ -143,6 +150,8 @@ PHP_FUNCTION(vincenty);
 PHP_FUNCTION(rdp_simplify);
 PHP_FUNCTION(interpolate_linestring);
 PHP_FUNCTION(interpolate_polygon);
+PHP_FUNCTION(geohash_encode);
+PHP_FUNCTION(geohash_decode);
 
 #endif /* PHP_GEOSPATIAL_H */
 
