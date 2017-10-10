@@ -1207,7 +1207,7 @@ PHP_FUNCTION(geohash_encode)
     double lat;
     double lng;
 
-#if PHP_MAJOR_VERSION >= 7
+#if PHP_VERSION_ID >= 70000
     zend_long precision = 12;
 #else
     long precision = 12;
@@ -1216,7 +1216,7 @@ PHP_FUNCTION(geohash_encode)
     zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd|l", &lat, &lng, &precision);
     char* hash;
     hash = _geohash_encode(lat, lng, precision);
-#if PHP_MAJOR_VERSION < 7
+#if PHP_VERSION_ID < 70000
     RETVAL_STRING(hash, 0);
 #else
     RETVAL_STRING(hash);
@@ -1230,7 +1230,7 @@ PHP_FUNCTION(geohash_decode)
 {
     char* hash;
 
-#if PHP_MAJOR_VERSION >= 7
+#if PHP_VERSION_ID >= 70000
     size_t hash_len;
 #else
     int hash_len;
