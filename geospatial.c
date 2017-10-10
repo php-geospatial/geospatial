@@ -496,7 +496,7 @@ PHP_FUNCTION(dms_to_decimal)
 		sign = strcmp(direction, "S") == 0 || strcmp(direction, "W") == 0 ? -1 : 1;
 	}
 
-	decimal = abs(degrees) + minutes / 60 + seconds / 3600;
+	decimal = fabs(degrees) + minutes / 60 + seconds / 3600;
 	decimal *= sign;
 	RETURN_DOUBLE(decimal);
 }
