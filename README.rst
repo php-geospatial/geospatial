@@ -170,3 +170,29 @@ you would use::
 	$point2 = [ 'type' => 'Point', 'coordinates' => [ 15, 10 ] ];
 
 	var_dump(fraction_along_gc_line($point1, $point2, 0.25));
+
+Geohashing
+----------
+
+The `geohash_encode` function can be used to convert GeoJSON Point to a geohash::
+
+    $geohash = geohash_encode(array('type' => 'Point', 'coordinates' => [16.4, 48.2]), 12);
+
+Which outputs::
+    
+    u2edjnw17enr
+
+Similarly, a hashed geopoint can be decoded using `geohash_decode` function::
+
+    var_dump(geohash_decode('abcdefghijkl'));
+    array(2) {
+      ["type"]=>
+      string(5) "Point"
+      ["coordinates"]=>
+      array(2) {
+        [0]=>
+        float(16.4)
+        [1]=>
+        float(48.2)
+      }
+    }
