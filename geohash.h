@@ -25,8 +25,6 @@
 #define MAX_LONG            180.0
 #define MIN_LONG            -180.0
 
-static char char_map[32] = "0123456789bcdefghjkmnpqrstuvwxyz";
-
 char* php_geo_geohash_encode(double lat, double lng, int precision);
 geo_lat_long php_geo_geohash_decode(char* hash);
 #endif /* PHP_GEOHASH_H */

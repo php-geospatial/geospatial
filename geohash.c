@@ -28,6 +28,8 @@ typedef struct IntervalStruct {
     double low;
 } interval_struct;
 
+static char char_map[32] = "0123456789bcdefghjkmnpqrstuvwxyz";
+
 char* php_geo_geohash_encode(double latitude, double longitude, int precision)
 {
     char* hash;
