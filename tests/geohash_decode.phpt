@@ -21,8 +21,6 @@ var_dump(geohash_decode('ezs42'));
 
 var_dump(geohash_decode('.'));
 
-var_dump(geohash_decode('😀'));
-
 var_dump(geohash_decode('u2edjnw17enr'));
 ?>
 --EXPECT--
@@ -178,17 +176,6 @@ array(2) {
     float(157.5)
     [1]=>
     float(67.5)
-  }
-}
-array(2) {
-  ["type"]=>
-  string(5) "Point"
-  ["coordinates"]=>
-  array(2) {
-    [0]=>
-    float(179.82421875)
-    [1]=>
-    float(89.912109375)
   }
 }
 array(2) {
