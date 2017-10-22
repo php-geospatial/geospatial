@@ -62,4 +62,3 @@ void geo_array_dtor(geo_array *points)
 	free(points);
 }
 #endif /* PHP_GEO_ARRAY_H */
-

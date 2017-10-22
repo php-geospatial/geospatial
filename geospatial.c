@@ -1096,7 +1096,6 @@ PHP_FUNCTION(geohash_encode)
 #endif
     zval *geojson;
 
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al", &geojson, &precision) == FAILURE) {
 		return;
 	}
@@ -1138,7 +1137,6 @@ PHP_FUNCTION(geohash_decode)
 }
 
 /* }}}*/
-
 
 /*
  * Local variables:
