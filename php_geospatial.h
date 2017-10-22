@@ -40,12 +40,6 @@ extern zend_module_entry geospatial_module_entry;
 #endif
 
 typedef struct {
-   double   latitude;
-   double   longitude;
-   double   height;
-} geo_lat_long;
-
-typedef struct {
    double    a;
    double    b;
    double    f;
@@ -125,13 +119,6 @@ const geo_helmert_constants osgb36_wgs84 = {
 #define GEO_AIRY_1830 0x0002
 
 #define HEIGHT 24.7
-
-
-#define MAX_LAT             90.0
-#define MIN_LAT             -90.0
-
-#define MAX_LONG            180.0
-#define MIN_LONG            -180.0
 
 
 PHP_MINIT_FUNCTION(geospatial);
