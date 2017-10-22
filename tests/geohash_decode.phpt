@@ -23,95 +23,182 @@ var_dump(geohash_decode('.'));
 
 var_dump(geohash_decode('😀'));
 
+var_dump(geohash_decode('u2edjnw17enr'));
 ?>
 --EXPECT--
 array(2) {
-  ["latitude"]=>
-  float(67.5)
-  ["longitude"]=>
-  float(157.5)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(157.5)
+    [1]=>
+    float(67.5)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(47.8125)
-  ["longitude"]=>
-  float(174.375)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(174.375)
+    [1]=>
+    float(47.8125)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.921875)
-  ["longitude"]=>
-  float(170.859375)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(170.859375)
+    [1]=>
+    float(49.921875)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.658203125)
-  ["longitude"]=>
-  float(171.03515625)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.03515625)
+    [1]=>
+    float(49.658203125)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.68017578125)
-  ["longitude"]=>
-  float(171.01318359375)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.01318359375)
+    [1]=>
+    float(49.68017578125)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.671936035156)
-  ["longitude"]=>
-  float(171.02966308594)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.02966308594)
+    [1]=>
+    float(49.671936035156)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.67399597168)
-  ["longitude"]=>
-  float(171.02897644043)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.02897644043)
+    [1]=>
+    float(49.67399597168)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.674081802368)
-  ["longitude"]=>
-  float(171.0284614563)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.0284614563)
+    [1]=>
+    float(49.674081802368)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.674146175385)
-  ["longitude"]=>
-  float(171.02861166)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.02861166)
+    [1]=>
+    float(49.674146175385)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.674154222012)
-  ["longitude"]=>
-  float(171.02859556675)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.02859556675)
+    [1]=>
+    float(49.674154222012)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.674153551459)
-  ["longitude"]=>
-  float(171.0285962373)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.0285962373)
+    [1]=>
+    float(49.674153551459)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(49.674154138193)
-  ["longitude"]=>
-  float(171.02859674022)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(171.02859674022)
+    [1]=>
+    float(49.674154138193)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(42.60498046875)
-  ["longitude"]=>
-  float(-5.60302734375)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(-5.60302734375)
+    [1]=>
+    float(42.60498046875)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(67.5)
-  ["longitude"]=>
-  float(157.5)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(157.5)
+    [1]=>
+    float(67.5)
+  }
 }
 array(2) {
-  ["latitude"]=>
-  float(89.912109375)
-  ["longitude"]=>
-  float(179.82421875)
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(179.82421875)
+    [1]=>
+    float(89.912109375)
+  }
+}
+array(2) {
+  ["type"]=>
+  string(5) "Point"
+  ["coordinates"]=>
+  array(2) {
+    [0]=>
+    float(16.40000006184)
+    [1]=>
+    float(48.199999993667)
+  }
 }
