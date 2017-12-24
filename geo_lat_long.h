@@ -20,9 +20,9 @@
 #define PHP_GEO_LAT_LONG_H
 
 typedef struct {
-   double   latitude;
-   double   longitude;
-   double   height;
+   double   x;
+   double   y;
+   double   z;
 } geo_lat_long;
 
 #endif

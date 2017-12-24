@@ -468,9 +468,9 @@ geo_lat_long cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
 
 	lambda = atan2(y ,x);
 	h = p / cos(phi) - nu;
-	polar.latitude = phi / GEO_DEG_TO_RAD;
-	polar.longitude = lambda / GEO_DEG_TO_RAD;
-	polar.height = h;
+	polar.x = phi / GEO_DEG_TO_RAD;
+	polar.y = lambda / GEO_DEG_TO_RAD;
+	polar.z = h;
 
 	return polar;
 }
@@ -597,9 +597,9 @@ PHP_FUNCTION(cartesian_to_polar)
 	geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
 	array_init(return_value);
 	polar = cartesian_to_polar(x, y, z, eli);
-	add_assoc_double(return_value, "lat", polar.latitude);
-	add_assoc_double(return_value, "long", polar.longitude);
-	add_assoc_double(return_value, "height", polar.height);
+	add_assoc_double(return_value, "lat", polar.x);
+	add_assoc_double(return_value, "long", polar.y);
+	add_assoc_double(return_value, "height", polar.z);
 }
 /* }}} */
 
@@ -634,7 +634,7 @@ PHP_FUNCTION(transform_datum)
 	add_assoc_double(return_value, "long", polar.longitude);
 	add_assoc_double(return_value, "height", polar.height);
 */
-	retval_point_from_coordinates(return_value, polar.longitude, polar.latitude);
+	retval_point_from_coordinates(return_value, polar.y, polar.x);
 }
 /* }}} */
 
@@ -1133,7 +1133,7 @@ PHP_FUNCTION(geohash_decode)
 
 	geo_lat_long area = php_geo_geohash_decode(hash);
 
-	retval_point_from_coordinates(return_value, area.longitude, area.latitude);
+	retval_point_from_coordinates(return_value, area.y, area.x);
 }
 
 /* }}}*/

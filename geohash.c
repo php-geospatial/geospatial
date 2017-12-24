@@ -135,9 +135,9 @@ geo_lat_long php_geo_geohash_decode(char* hash)
             }
         }
 
-        coordinate.latitude = lat_interval.high - ((lat_interval.high - lat_interval.low) / 2.0);
-        coordinate.longitude = lng_interval.high - ((lng_interval.high - lng_interval.low) / 2.0);
-        coordinate.height = 0;
+        coordinate.x = lat_interval.high - ((lat_interval.high - lat_interval.low) / 2.0);
+        coordinate.y = lng_interval.high - ((lng_interval.high - lng_interval.low) / 2.0);
+        coordinate.z = 0;
     }
 
     return coordinate;
