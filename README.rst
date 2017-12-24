@@ -174,9 +174,9 @@ you would use::
 Geohashing
 ----------
 
-The `geohash_encode` function can be used to convert GeoJSON Point to a geohash::
+The `geohash_encode` function can be used to convert GeoJSON Point to a geohash of a specific lenth (in this case, 12)::
 
-    $geohash = geohash_encode(array('type' => 'Point', 'coordinates' => [16.4, 48.2]), 12);
+    echo geohash_encode(array('type' => 'Point', 'coordinates' => [16.4, 48.2]), 12);
 
 Which outputs::
     
@@ -184,15 +184,15 @@ Which outputs::
 
 Similarly, a hashed geopoint can be decoded using `geohash_decode` function::
 
-    var_dump(geohash_decode('abcdefghijkl'));
+    var_dump(geohash_decode('u2edjnw17enr'));
     array(2) {
       ["type"]=>
       string(5) "Point"
       ["coordinates"]=>
       array(2) {
         [0]=>
-        float(16.4)
+        float(16.40000006184)
         [1]=>
-        float(48.2)
+        float(48.199999993667)
       }
     }
