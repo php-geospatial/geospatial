@@ -19,12 +19,6 @@
 #ifndef PHP_GEOHASH_H
 #define PHP_GEOHASH_H
 
-#define MAX_LAT             90.0
-#define MIN_LAT             -90.0
-
-#define MAX_LONG            180.0
-#define MIN_LONG            -180.0
-
 char* php_geo_geohash_encode(double lat, double lng, int precision);
 geo_lat_long php_geo_geohash_decode(char* hash);
 #endif /* PHP_GEOHASH_H */

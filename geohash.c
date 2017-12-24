@@ -22,6 +22,12 @@
 #include "geo_lat_long.h"
 #include "geohash.h"
 
+#define MAX_LAT  90.0
+#define MIN_LAT  -90.0
+
+#define MAX_LONG 180.0
+#define MIN_LONG -180.0
+
 typedef struct interval_string {
     double high;
     double low;
