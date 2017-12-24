@@ -22,7 +22,7 @@
 #include "geo_lat_long.h"
 #include "geohash.h"
 
-typedef struct IntervalStruct {
+typedef struct interval_string {
     double high;
     double low;
 } interval_struct;
