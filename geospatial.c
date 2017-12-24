@@ -16,6 +16,7 @@
   |          Michael Maclean <michael@no-surprises.co.uk>                |
   |          Nathaniel McHugh <nmchugh@inviqa.com>                       |
   |          Marcus Deglos <marcus@deglos.com>                           |
+  |          Emir Beganovic <emir@php.net>                               |
   +----------------------------------------------------------------------+
 */
 
@@ -28,6 +29,8 @@
 #include "ext/standard/info.h"
 #include "php_geospatial.h"
 #include "geo_array.h"
+#include "geo_lat_long.h"
+#include "geohash.h"
 #include "Zend/zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
 
@@ -111,6 +114,16 @@ ZEND_BEGIN_ARG_INFO_EX(interpolate_polygon_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, epsilon)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(geohash_encode_args, 0, 0, 3)
+	ZEND_ARG_INFO(0, latitude)
+	ZEND_ARG_INFO(0, longitude)
+	ZEND_ARG_INFO(0, precision)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(geohash_decode_args, 0, 0, 1)
+	ZEND_ARG_INFO(0, geohash)
+ZEND_END_ARG_INFO()
+
 /* {{{ geospatial_functions[]
  *
  * Every user visible function must have an entry in geospatial_functions[].
@@ -129,6 +142,8 @@ const zend_function_entry geospatial_functions[] = {
 	PHP_FE(rdp_simplify, rdp_simplify_args)
 	PHP_FE(interpolate_linestring, interpolate_linestring_args)
 	PHP_FE(interpolate_polygon, interpolate_polygon_args)
+	PHP_FE(geohash_encode, geohash_encode_args)
+	PHP_FE(geohash_decode, geohash_decode_args)
 	/* End of functions */
 	{ NULL, NULL, NULL }
 };
@@ -354,7 +369,7 @@ double php_geo_vincenty(double from_lat, double from_long, double to_lat, double
 		sinLambda = sin(lambda);
 		cosLambda = cos(lambda);
 		sinSigma = sqrt((cosU2*sinLambda) * (cosU2*sinLambda) + 
-      (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+	  (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
 		cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
 		sigma = atan2(sinSigma, cosSigma);
 		sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
@@ -363,14 +378,14 @@ double php_geo_vincenty(double from_lat, double from_long, double to_lat, double
 		C = eli.f / 16.0 * cos2Alpha * (4.0 + eli.f * (4.0 - 3.0 * cos2Alpha));
 		lambdaP = lambda;
 		lambda = L + (1.0 - C) * eli.f * sinAlpha *
-      (sigma + C*sinSigma*(cosof2sigma+C*cosSigma*(-1.0 + 2.0 *cosof2sigma*cosof2sigma)));
+	  (sigma + C*sinSigma*(cosof2sigma+C*cosSigma*(-1.0 + 2.0 *cosof2sigma*cosof2sigma)));
 		--loopLimit;
 	} while (fabs(lambda -  lambdaP) > precision && loopLimit > 0);
 	uSq = cos2Alpha * (eli.a * eli.a - eli.b * eli.b) / (eli.b * eli.b);
 	A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)));
 	B = uSq / 1024.0 * ( 256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)));
 	deltaSigma = B * sinSigma * (cosof2sigma+B/4.0 * (cosSigma * (-1.0 + 2.0 *cosof2sigma*cosof2sigma)-
-    B / 6.0 * cosof2sigma * (-3.0 + 4.0 *sinSigma*sinSigma) * (-3.0 + 4.0 *cosof2sigma*cosof2sigma)));
+	B / 6.0 * cosof2sigma * (-3.0 + 4.0 *sinSigma*sinSigma) * (-3.0 + 4.0 *cosof2sigma*cosof2sigma)));
 	s = eli.b * A * (sigma - deltaSigma);
 	s = floor(s * 1000) / 1000;
 	return s;
@@ -453,9 +468,9 @@ geo_lat_long cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
 
 	lambda = atan2(y ,x);
 	h = p / cos(phi) - nu;
-	polar.latitude = phi / GEO_DEG_TO_RAD;
-	polar.longitude = lambda / GEO_DEG_TO_RAD;
-	polar.height = h;
+	polar.x = phi / GEO_DEG_TO_RAD;
+	polar.y = lambda / GEO_DEG_TO_RAD;
+	polar.z = h;
 
 	return polar;
 }
@@ -483,7 +498,7 @@ PHP_FUNCTION(dms_to_decimal)
 		sign = strcmp(direction, "S") == 0 || strcmp(direction, "W") == 0 ? -1 : 1;
 	}
 
-	decimal = abs(degrees) + minutes / 60 + seconds / 3600;
+	decimal = fabs(degrees) + minutes / 60 + seconds / 3600;
 	decimal *= sign;
 	RETURN_DOUBLE(decimal);
 }
@@ -582,9 +597,9 @@ PHP_FUNCTION(cartesian_to_polar)
 	geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
 	array_init(return_value);
 	polar = cartesian_to_polar(x, y, z, eli);
-	add_assoc_double(return_value, "lat", polar.latitude);
-	add_assoc_double(return_value, "long", polar.longitude);
-	add_assoc_double(return_value, "height", polar.height);
+	add_assoc_double(return_value, "lat", polar.x);
+	add_assoc_double(return_value, "long", polar.y);
+	add_assoc_double(return_value, "height", polar.z);
 }
 /* }}} */
 
@@ -619,7 +634,7 @@ PHP_FUNCTION(transform_datum)
 	add_assoc_double(return_value, "long", polar.longitude);
 	add_assoc_double(return_value, "height", polar.height);
 */
-	retval_point_from_coordinates(return_value, polar.longitude, polar.latitude);
+	retval_point_from_coordinates(return_value, polar.y, polar.x);
 }
 /* }}} */
 
@@ -714,7 +729,7 @@ double php_initial_bearing(double from_lat, double from_long, double to_lat, dou
 /*
 var y = Math.sin(dLon) * Math.cos(lat2);
 var x = Math.cos(lat1)*Math.sin(lat2) -
-        Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+		Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
 var brng = Math.atan2(y, x).toDeg();
 */
 	double x, y;
@@ -1066,6 +1081,62 @@ PHP_FUNCTION(interpolate_polygon)
 	geo_array_dtor(points);
 }
 /* }}} */
+
+
+/* {{{ string geohash_encode(GeoJSONPoint $point [, int $precision = 12])
+ */
+PHP_FUNCTION(geohash_encode)
+{
+	double longitude, latitude;
+
+#if PHP_VERSION_ID >= 70000
+	zend_long precision = 12;
+#else
+	long precision = 12;
+#endif
+	zval *geojson;
+	char* hash;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al", &geojson, &precision) == FAILURE) {
+		return;
+	}
+
+	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+
+	hash = php_geo_geohash_encode(latitude, longitude, precision);
+#if PHP_VERSION_ID < 70000
+	RETVAL_STRING(hash, 0);
+#else
+	RETVAL_STRING(hash);
+	efree(hash);
+#endif
+}
+
+/* {{{ string geohash_decode(string $geohash)
+ */
+PHP_FUNCTION(geohash_decode)
+{
+	char* hash;
+
+#if PHP_VERSION_ID >= 70000
+	size_t hash_len;
+#else
+	int hash_len;
+#endif
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
+		return;
+	}
+
+	geo_lat_long area = php_geo_geohash_decode(hash);
+
+	retval_point_from_coordinates(return_value, area.y, area.x);
+}
+
+/* }}}*/
 
 /*
  * Local variables:

@@ -40,12 +40,6 @@ extern zend_module_entry geospatial_module_entry;
 #endif
 
 typedef struct {
-   double   latitude;
-   double   longitude;
-   double   height;
-} geo_lat_long;
-
-typedef struct {
    double    a;
    double    b;
    double    f;
@@ -143,6 +137,8 @@ PHP_FUNCTION(vincenty);
 PHP_FUNCTION(rdp_simplify);
 PHP_FUNCTION(interpolate_linestring);
 PHP_FUNCTION(interpolate_polygon);
+PHP_FUNCTION(geohash_encode);
+PHP_FUNCTION(geohash_decode);
 
 #endif /* PHP_GEOSPATIAL_H */
 
