@@ -26,11 +26,12 @@
   <email>mgdm@php.net</email>
   <active>yes</active>
  </lead>
- <date>2015-12-04</date>
- <time>18:56:58</time>
+
+ <date>2017-12-29</date>
+ <time>12:06:18</time>
  <version>
-  <release>0.1.0</release>
-  <api>0.1.0</api>
+  <release>0.2.0</release>
+  <api>0.2.0</api>
  </version>
  <stability>
   <release>beta</release>
@@ -38,16 +39,22 @@
  </stability>
  <license uri="http://www.php.net/license">PHP 3.01</license>
  <notes>
-Initial release on PECL (with PHP 7 support).
+- Fixed issue #16: Segfault on rdp_simplify for GeoJSON
+- Add Travis tests (Emir Beganovic)
+- Fixed issue #20: Add Geo Hashing functions geohash_encode and geohash_decode. (Emir Beganovic)
  </notes>
+
  <contents>
   <dir name="/">
    <file name="LICENSE" role="doc" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="geo_array.h" role="src" />
+   <file name="geo_lat_long.h" role="src" />
+   <file name="geohash.h" role="src" />
    <file name="php_geospatial.h" role="src" />
    <file name="geo_array.c" role="src" />
+   <file name="geohash.c" role="src" />
    <file name="geospatial.c" role="src" />
   </dir> <!-- / -->
  </contents>
@@ -64,6 +71,24 @@ Initial release on PECL (with PHP 7 support).
  <providesextension>geospatial</providesextension>
  <extsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-12-04</date>
+   <time>18:56:58</time>
+   <version>
+    <release>0.1.0</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.php.net/license">PHP 3.01</license>
+   <notes>
+Initial release on PECL (with PHP 7 support).
+   </notes>
+  </release>
+
  </changelog>
 </package>
 <!--
