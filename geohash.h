@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5/7                                                      |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 2017 The PHP Group                                     |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,24 +12,13 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Derick Rethans <github@derickrethans.nl>                    |
-  |          Michael Maclean <michael@no-surprises.co.uk>                |
-  |          Nathaniel McHugh <nmchugh@inviqa.com>                       |
-  |          Marcus Deglos <marcus@deglos.com>                           |
+  | Authors: Emir Beganovic <emir@php.net>                               |
   +----------------------------------------------------------------------+
 */
-#ifndef PHP_GEO_ARRAY_H
-#define PHP_GEO_ARRAY_H
+#ifndef PHP_GEOHASH_H
+#define PHP_GEOHASH_H
 
-typedef struct geo_array {
-	double  *x;
-	double  *y;
-	char    *status;
-	int      count;
-	int      allocated;
-} geo_array;
+char *php_geo_geohash_encode(double lat, double lng, int precision);
+geo_lat_long php_geo_geohash_decode(char *hash, size_t hash_len);
 
-geo_array *geo_array_ctor(int element_count);
-void geo_array_add(geo_array *points, double lat, double lon);
-void geo_array_dtor(geo_array *points);
-#endif /* PHP_GEO_ARRAY_H */
+#endif /* PHP_GEOHASH_H */
