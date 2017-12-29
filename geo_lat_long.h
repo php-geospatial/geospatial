@@ -15,14 +15,13 @@
   | Authors: Emir Beganovic <emir@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
 #ifndef PHP_GEO_LAT_LONG_H
 #define PHP_GEO_LAT_LONG_H
 
 typedef struct {
-   double   x;
-   double   y;
-   double   z;
+	double x;
+	double y;
+	double z;
 } geo_lat_long;
 
 #endif

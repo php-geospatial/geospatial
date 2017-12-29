@@ -22,125 +22,119 @@
 #include "geo_lat_long.h"
 #include "geohash.h"
 
-#define MAX_LAT  90.0
+#define MAX_LAT   90.0
 #define MIN_LAT  -90.0
 
-#define MAX_LONG 180.0
+#define MAX_LONG  180.0
 #define MIN_LONG -180.0
 
 typedef struct interval_string {
-    double high;
-    double low;
+	double high;
+	double low;
 } interval_struct;
 
 static char char_map[32] = "0123456789bcdefghjkmnpqrstuvwxyz";
+static size_t char_map_size = sizeof(char_map);
 
-char* php_geo_geohash_encode(double latitude, double longitude, int precision)
+char *php_geo_geohash_encode(double latitude, double longitude, int precision)
 {
-    char* hash;
-    int steps;
-    double coord, mid;
-    int is_even = 1;
-    unsigned int hash_char = 0;
-    int i;
-    interval_struct lat_interval = { MAX_LAT, MIN_LAT };
-    interval_struct lng_interval = { MAX_LONG, MIN_LONG };
-    interval_struct* interval;
+	char            *hash;
+	int              steps;
+	double           coord, mid;
+	int              is_even = 1;
+	unsigned int     hash_char = 0;
+	int              i;
+	interval_struct  lat_interval = { MAX_LAT, MIN_LAT };
+	interval_struct  lng_interval = { MAX_LONG, MIN_LONG };
+	interval_struct *interval;
 
-    hash = (char*)safe_emalloc(precision, sizeof(char), 1);
+	hash = (char*)safe_emalloc(precision, sizeof(char), 1);
 
-    hash[precision] = '\0';
-    steps = precision * 5.0;
+	hash[precision] = '\0';
+	steps = precision * 5.0;
 
-    for (i = 1; i <= steps; i++) {
-        if (is_even) {
-            interval = &lng_interval;
-            coord = longitude;
-        } else {
-            interval = &lat_interval;
-            coord = latitude;
-        }
+	for (i = 1; i <= steps; i++) {
+		if (is_even) {
+			interval = &lng_interval;
+			coord = longitude;
+		} else {
+			interval = &lat_interval;
+			coord = latitude;
+		}
 
-        mid = (interval->low + interval->high) / 2.0;
-        hash_char = hash_char << 1;
+		mid = (interval->low + interval->high) / 2.0;
+		hash_char = hash_char << 1;
 
-        if (coord > mid) {
-            interval->low = mid;
-            hash_char |= 0x01;
-        } else {
-            interval->high = mid;
-        }
+		if (coord > mid) {
+			interval->low = mid;
+			hash_char |= 0x01;
+		} else {
+			interval->high = mid;
+		}
 
-        if (!(i % 5)) {
-            hash[(i - 1) / 5] = char_map[hash_char];
-            hash_char = 0;
-        }
+		if (!(i % 5)) {
+			hash[(i - 1) / 5] = char_map[hash_char];
+			hash_char = 0;
+		}
 
-        is_even = !is_even;
-    }
+		is_even = !is_even;
+	}
 
-    return hash;
+	return hash;
 }
 
-static unsigned int index_for_char(char c, char* string)
+static unsigned int index_for_char(char c, char *string, size_t string_amount)
 {
-    unsigned int index = -1;
-    int string_amount = strlen(string);
-    int i;
+	unsigned int index = -1;
+	int          i;
 
-    for (i = 0; i < string_amount; i++) {
-        if (c == string[i]) {
-            index = i;
-            break;
-        }
-    }
+	for (i = 0; i < string_amount; i++) {
+		if (c == string[i]) {
+			index = i;
+			break;
+		}
+	}
 
-    return index;
+	return index;
 }
 
-geo_lat_long php_geo_geohash_decode(char* hash)
+geo_lat_long php_geo_geohash_decode(char *hash, size_t char_amount)
 {
-    geo_lat_long coordinate;
-    int char_amount = strlen(hash);
+	geo_lat_long coordinate;
 
-    if (char_amount) {
+	if (char_amount) {
+		int              charmap_index;
+		double           delta;
+		int              i, j;
+		interval_struct  lat_interval = { MAX_LAT, MIN_LAT };
+		interval_struct  lng_interval = { MAX_LONG, MIN_LONG };
+		interval_struct *interval;
 
-        int charmap_index;
-        double delta;
-        int i, j;
+		int is_even = 1;
 
-        interval_struct lat_interval = { MAX_LAT, MIN_LAT };
-        interval_struct lng_interval = { MAX_LONG, MIN_LONG };
-        interval_struct* interval;
+		for (i = 0; i < char_amount; i++) {
+			charmap_index = index_for_char(hash[i], char_map, char_map_size);
 
-        int is_even = 1;
+			/* Interpret the last 5 bits of the integer */
+			for (j = 0; j < 5; j++) {
+				interval = is_even ? &lng_interval : &lat_interval;
 
-        for (i = 0; i < char_amount; i++) {
+				delta = (interval->high - interval->low) / 2.0;
 
-            charmap_index = index_for_char(hash[i], (char*)char_map);
+				if ((charmap_index << j) & 0x0010) {
+					interval->low += delta;
+				} else {
+					interval->high -= delta;
+				}
 
-            /* Interpret the last 5 bits of the integer */
-            for (j = 0; j < 5; j++) {
-                interval = is_even ? &lng_interval : &lat_interval;
+				is_even = !is_even;
+			}
+		}
 
-                delta = (interval->high - interval->low) / 2.0;
+		coordinate.x = lat_interval.high - ((lat_interval.high - lat_interval.low) / 2.0);
+		coordinate.y = lng_interval.high - ((lng_interval.high - lng_interval.low) / 2.0);
+		coordinate.z = 0;
+	}
 
-                if ((charmap_index << j) & 0x0010) {
-                    interval->low += delta;
-                } else {
-                    interval->high -= delta;
-                }
-
-                is_even = !is_even;
-            }
-        }
-
-        coordinate.x = lat_interval.high - ((lat_interval.high - lat_interval.low) / 2.0);
-        coordinate.y = lng_interval.high - ((lng_interval.high - lng_interval.low) / 2.0);
-        coordinate.z = 0;
-    }
-
-    return coordinate;
+	return coordinate;
 }
-
-/* }}} */

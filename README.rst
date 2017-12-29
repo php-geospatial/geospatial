@@ -174,25 +174,28 @@ you would use::
 Geohashing
 ----------
 
-The `geohash_encode` function can be used to convert GeoJSON Point to a geohash of a specific lenth (in this case, 12)::
+The `geohash_encode` function can be used to convert GeoJSON Point to a
+geohash of a specific length (in this case, 12)::
 
-    echo geohash_encode(array('type' => 'Point', 'coordinates' => [16.4, 48.2]), 12);
+	$point = [ 'type' => 'Point', 'coordinates' => [ 16.4, 48.2 ] ];
+	echo geohash_encode( $point, 12 );
 
 Which outputs::
     
-    u2edjnw17enr
+	u2edjnw17enr
 
-Similarly, a hashed geopoint can be decoded using `geohash_decode` function::
+Similarly, a hashed coordinates pair can be decoded using `geohash_decode`
+function::
 
-    var_dump(geohash_decode('u2edjnw17enr'));
-    array(2) {
-      ["type"]=>
-      string(5) "Point"
-      ["coordinates"]=>
-      array(2) {
-        [0]=>
-        float(16.40000006184)
-        [1]=>
-        float(48.199999993667)
-      }
-    }
+	var_dump(geohash_decode('u2edjnw17enr'));
+	array(2) {
+	  ["type"]=>
+	  string(5) "Point"
+	  ["coordinates"]=>
+	  array(2) {
+		[0]=>
+		float(16.40000006184)
+		[1]=>
+		float(48.199999993667)
+	  }
+	}

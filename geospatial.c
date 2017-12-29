@@ -369,7 +369,7 @@ double php_geo_vincenty(double from_lat, double from_long, double to_lat, double
 		sinLambda = sin(lambda);
 		cosLambda = cos(lambda);
 		sinSigma = sqrt((cosU2*sinLambda) * (cosU2*sinLambda) + 
-	  (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+			(cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
 		cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
 		sigma = atan2(sinSigma, cosSigma);
 		sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
@@ -378,14 +378,14 @@ double php_geo_vincenty(double from_lat, double from_long, double to_lat, double
 		C = eli.f / 16.0 * cos2Alpha * (4.0 + eli.f * (4.0 - 3.0 * cos2Alpha));
 		lambdaP = lambda;
 		lambda = L + (1.0 - C) * eli.f * sinAlpha *
-	  (sigma + C*sinSigma*(cosof2sigma+C*cosSigma*(-1.0 + 2.0 *cosof2sigma*cosof2sigma)));
+			(sigma + C*sinSigma*(cosof2sigma+C*cosSigma*(-1.0 + 2.0 *cosof2sigma*cosof2sigma)));
 		--loopLimit;
 	} while (fabs(lambda -  lambdaP) > precision && loopLimit > 0);
 	uSq = cos2Alpha * (eli.a * eli.a - eli.b * eli.b) / (eli.b * eli.b);
 	A = 1.0 + uSq / 16384.0 * (4096.0 + uSq * (-768.0 + uSq * (320.0 - 175.0 * uSq)));
 	B = uSq / 1024.0 * ( 256.0 + uSq * (-128.0 + uSq * (74.0 - 47.0 * uSq)));
-	deltaSigma = B * sinSigma * (cosof2sigma+B/4.0 * (cosSigma * (-1.0 + 2.0 *cosof2sigma*cosof2sigma)-
-	B / 6.0 * cosof2sigma * (-3.0 + 4.0 *sinSigma*sinSigma) * (-3.0 + 4.0 *cosof2sigma*cosof2sigma)));
+	deltaSigma = B * sinSigma * (cosof2sigma+B/4.0 * (cosSigma * (-1.0 + 2.0 *cosof2sigma*cosof2sigma) -
+		B / 6.0 * cosof2sigma * (-3.0 + 4.0 *sinSigma*sinSigma) * (-3.0 + 4.0 *cosof2sigma*cosof2sigma)));
 	s = eli.b * A * (sigma - deltaSigma);
 	s = floor(s * 1000) / 1000;
 	return s;
@@ -729,7 +729,7 @@ double php_initial_bearing(double from_lat, double from_long, double to_lat, dou
 /*
 var y = Math.sin(dLon) * Math.cos(lat2);
 var x = Math.cos(lat1)*Math.sin(lat2) -
-		Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+        Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
 var brng = Math.atan2(y, x).toDeg();
 */
 	double x, y;
@@ -1087,15 +1087,14 @@ PHP_FUNCTION(interpolate_polygon)
  */
 PHP_FUNCTION(geohash_encode)
 {
-	double longitude, latitude;
-
+	double     longitude, latitude;
 #if PHP_VERSION_ID >= 70000
-	zend_long precision = 12;
+	zend_long  precision = 12;
 #else
-	long precision = 12;
+	long       precision = 12;
 #endif
-	zval *geojson;
-	char* hash;
+	zval      *geojson;
+	char      *hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al", &geojson, &precision) == FAILURE) {
 		return;
@@ -1105,13 +1104,12 @@ PHP_FUNCTION(geohash_encode)
 		RETURN_FALSE;
 	}
 
-
 	hash = php_geo_geohash_encode(latitude, longitude, precision);
-#if PHP_VERSION_ID < 70000
-	RETVAL_STRING(hash, 0);
-#else
+#if PHP_VERSION_ID >= 70000
 	RETVAL_STRING(hash);
 	efree(hash);
+#else
+	RETVAL_STRING(hash, 0);
 #endif
 }
 
@@ -1119,19 +1117,18 @@ PHP_FUNCTION(geohash_encode)
  */
 PHP_FUNCTION(geohash_decode)
 {
-	char* hash;
-
+	char   *hash;
 #if PHP_VERSION_ID >= 70000
-	size_t hash_len;
+	size_t  hash_len;
 #else
-	int hash_len;
+	int     hash_len;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
 		return;
 	}
 
-	geo_lat_long area = php_geo_geohash_decode(hash);
+	geo_lat_long area = php_geo_geohash_decode(hash, hash_len);
 
 	retval_point_from_coordinates(return_value, area.y, area.x);
 }

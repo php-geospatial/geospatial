@@ -15,19 +15,10 @@
   | Authors: Emir Beganovic <emir@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
 #ifndef PHP_GEOHASH_H
 #define PHP_GEOHASH_H
 
-char* php_geo_geohash_encode(double lat, double lng, int precision);
-geo_lat_long php_geo_geohash_decode(char* hash);
-#endif /* PHP_GEOHASH_H */
+char *php_geo_geohash_encode(double lat, double lng, int precision);
+geo_lat_long php_geo_geohash_decode(char *hash, size_t hash_len);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+#endif /* PHP_GEOHASH_H */

@@ -19,8 +19,6 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_GEO_ARRAY_H
-#define PHP_GEO_ARRAY_H
 #include <stdlib.h>
 
 #include "geo_array.h"
@@ -61,4 +59,3 @@ void geo_array_dtor(geo_array *points)
 	free(points->y);
 	free(points);
 }
-#endif /* PHP_GEO_ARRAY_H */

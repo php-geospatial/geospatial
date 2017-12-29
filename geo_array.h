@@ -18,6 +18,8 @@
   |          Marcus Deglos <marcus@deglos.com>                           |
   +----------------------------------------------------------------------+
 */
+#ifndef PHP_GEO_ARRAY_H
+#define PHP_GEO_ARRAY_H
 
 typedef struct geo_array {
 	double  *x;
@@ -30,3 +32,4 @@ typedef struct geo_array {
 geo_array *geo_array_ctor(int element_count);
 void geo_array_add(geo_array *points, double lat, double lon);
 void geo_array_dtor(geo_array *points);
+#endif /* PHP_GEO_ARRAY_H */
