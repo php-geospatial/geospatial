@@ -11,6 +11,7 @@ echo geohash_encode(array('type' => 'Point', 'coordinates' => [95, 95]), 6).PHP_
 echo geohash_encode(array('type' => 'Point', 'coordinates' => [185, 185]), 12).PHP_EOL;
 echo geohash_encode(array('type' => 'Point', 'coordinates' => [-90, -185]), 12).PHP_EOL;
 echo var_dump(geohash_encode(array('type' => 'Point', 'coordinates' => [30, 30]), 0));
+echo var_dump(geohash_encode(array('type' => 'Point', 'coordinates' => [30, 30]), -1));
 ?>
 --EXPECT--
 u2edjnw17enr
@@ -19,4 +20,5 @@ u2edk275te35u5s6504t7yfpbpbpbpbp
 ypgxcz
 zzzzzzzzzzzz
 1bpbpbpbpbpb
+string(0) ""
 string(0) ""
