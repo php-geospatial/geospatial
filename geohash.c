@@ -48,6 +48,10 @@ char *php_geo_geohash_encode(double latitude, double longitude, int precision)
 	interval_struct  lng_interval = { MAX_LONG, MIN_LONG };
 	interval_struct *interval;
 
+        if (precision < 0) {
+            precision = 0;
+        }
+
 	hash = (char*)safe_emalloc(precision, sizeof(char), 1);
 
 	hash[precision] = '\0';
