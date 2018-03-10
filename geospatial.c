@@ -460,7 +460,7 @@ geo_lat_long cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
 	double phi = atan2(z, p * (1 - eSq));
 	double phiP = 2 * M_PI;
 
-	while (abs(phi - phiP) > precision) {
+	while (fabs(phi - phiP) > precision) {
 		nu = eli.a / sqrt(1 - eSq * sin(phi) * sin(phi));
 		phiP = phi;
 		phi = atan2(z + eSq * nu * sin(phi), p);
