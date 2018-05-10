@@ -679,7 +679,7 @@ PHP_FUNCTION(vincenty)
 }
 /* }}} */
 
-void php_geo_fraction_along_gc_line(double from_lat, double from_long, double to_lat, double to_long, double fraction, double radius, double *res_lat, double *res_long)
+void php_geo_fraction_along_gc_line(double from_lat, double from_long, double to_lat, double to_long, double fraction, double *res_lat, double *res_long)
 {
 	double distance;
 	double a, b, x, y, z;
@@ -697,16 +697,15 @@ void php_geo_fraction_along_gc_line(double from_lat, double from_long, double to
 	*res_long = atan2(y, x);
 }
 
-/* {{{ proto GeoJSONPoint fraction_along_gc_line(GeoJSONPoint from, GeoJSONPoint to, double fraction [, double radius ])
+/* {{{ proto GeoJSONPoint fraction_along_gc_line(GeoJSONPoint from, GeoJSONPoint to, double fraction)
  * Calculates a lat/long pair at a fraction (0-1) of the distance along a GC line */
 PHP_FUNCTION(fraction_along_gc_line)
 {
 	zval   *from_geojson, *to_geojson;
 	double from_lat, from_long, to_lat, to_long, fraction;
-	double radius = GEO_EARTH_RADIUS;
 	double res_lat, res_long;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aad|d", &from_geojson, &to_geojson, &fraction, &radius) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aad", &from_geojson, &to_geojson, &fraction) == FAILURE) {
 		return;
 	}
 
@@ -718,7 +717,7 @@ PHP_FUNCTION(fraction_along_gc_line)
 		from_long * GEO_DEG_TO_RAD,
 		to_lat * GEO_DEG_TO_RAD,
 		to_long * GEO_DEG_TO_RAD,
-		fraction, radius,
+		fraction,
 		&res_lat, &res_long
 	);
 
@@ -986,7 +985,7 @@ static geo_array *interpolate_line(geo_array *points, double epsilon)
 					points->x[i] * GEO_DEG_TO_RAD,
 					points->y[i + 1] * GEO_DEG_TO_RAD,
 					points->x[i + 1] * GEO_DEG_TO_RAD,
-					fraction, GEO_EARTH_RADIUS,
+					fraction,
 					&res_lat, &res_long
 				);
 				geo_array_add(new_array, res_long / GEO_DEG_TO_RAD, res_lat / GEO_DEG_TO_RAD);
