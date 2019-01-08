@@ -27,11 +27,11 @@
   <active>yes</active>
  </lead>
 
- <date>2017-12-29</date>
- <time>12:06:18</time>
+ <date>2019-01-08</date>
+ <time>11:35:54</time>
  <version>
-  <release>0.2.0</release>
-  <api>0.2.0</api>
+  <release>0.2.1</release>
+  <api>0.2.1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -39,9 +39,10 @@
  </stability>
  <license uri="http://www.php.net/license">PHP 3.01</license>
  <notes>
-- Fixed issue #16: Segfault on rdp_simplify for GeoJSON
-- Add Travis tests (Emir Beganovic)
-- Fixed issue #20: Add Geo Hashing functions geohash_encode and geohash_decode. (Emir Beganovic)
+- Fixed issue #22: Compile failure with PHP 5.6 on Windows using VC11
+- Fixed issue #26: Initial Bearing Calculation Error
+- Fix possible integer overflow in memory allocation with negative precision in
+  geohash_encode (Emir Beganovic)
  </notes>
 
  <contents>
@@ -70,26 +71,6 @@
  </dependencies>
  <providesextension>geospatial</providesextension>
  <extsrcrelease />
- <changelog>
-
-  <release>
-   <date>2015-12-04</date>
-   <time>18:56:58</time>
-   <version>
-    <release>0.1.0</release>
-    <api>0.1.0</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <license uri="http://www.php.net/license">PHP 3.01</license>
-   <notes>
-Initial release on PECL (with PHP 7 support).
-   </notes>
-  </release>
-
- </changelog>
 </package>
 <!--
 vim:et:ts=1:sw=1
