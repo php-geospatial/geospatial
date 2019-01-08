@@ -96,6 +96,24 @@ Ordnance Survey in the UK::
 
     var_dump($greenwichObservatoryWGS84);
 
+Calculating Initial Bearing
+---------------------------
+
+The ``initial_bearing`` function calculates the initial bearing to go from the
+first to the second point, as expressed in a GeoJSON wrapper::
+
+	$from = array(
+		'type' => 'Point',
+		'coordinates' => array( 2.351, 48.857 )
+	);
+	$to = array(
+		'type' => 'Point',
+		'coordinates' => array( 0.119, 52.205 )
+	);
+	var_dump(initial_bearing($from, $to));
+
+The range of the resulting heading is 0° to +360°.
+
 Converting between polar and Cartesian Coordinates
 --------------------------------------------------
 

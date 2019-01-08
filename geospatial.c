@@ -733,12 +733,17 @@ var x = Math.cos(lat1)*Math.sin(lat2) -
         Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
 var brng = Math.atan2(y, x).toDeg();
 */
-	double x, y;
+	double x, y, initial_bearing;
 
-	y = sin(fabs(to_long - from_long)) * cos(to_lat);
-	x = (cos(from_lat) * sin(to_lat)) - (sin(from_lat) * cos(to_lat) * cos(fabs(to_long - from_long)));
+	y = sin(to_long - from_long) * cos(to_lat);
+	x = (cos(from_lat) * sin(to_lat)) - (sin(from_lat) * cos(to_lat) * cos(to_long - from_long));
 
-	return atan2(y, x);
+	initial_bearing = atan2(y, x);
+	if (initial_bearing < 0) {
+		initial_bearing += (M_PI * 2);
+	}
+
+	return initial_bearing;
 }
 
 /* {{{ proto float initial_bearing(GeoJSONPoint from, GeoJSONPoint to)
