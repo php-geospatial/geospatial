@@ -65,48 +65,6 @@ typedef struct {
   double rotation_z;
 } geo_helmert_constants;
 
-/**
- *  The WGS84 elipsoid semi major axes
- */
-const geo_ellipsoid wgs84 = {6378137.000, 6356752.3142, 1.0/298.257223563};
-
-/**
- *  The Airy 1830 elipsoid semi major axes
- */
-const geo_ellipsoid airy_1830 = {6377563.396, 6356256.910, 1.0/299.3249646};
-/**
- *  The GRS 80 elipsoid semi major axes
- */
-const geo_ellipsoid grs80 = {6378137.000, 6356752.314140, 1.0/298.257222101};
-
-/**
- *  The values of the 7 variables for performing helmert transformation between
- *  wgs84 and osgb36
- */
-const geo_helmert_constants wgs84_osgb36 = {
-  -446.448,
-  125.157,
-  -542.060,
-  0.0000204894,
-  -0.1502,
-  -0.2470,
-  -0.8421
-};
-
-/**
- *  The values of the 7 variables for performing helmert transformation between
- *  osgb36 and wgs84 -1 * the values for the reverse transformation
- */
-const geo_helmert_constants osgb36_wgs84 = {
-  446.448,
-  -125.157,
-  542.060,
-  -0.0000204894,
-  0.1502,
-  0.2470,
-  0.8421
-};
-
 #define GEO_DEG_TO_RAD 0.017453292519943295769236907684886
 /**
  * Calculate the radius using WGS-84's equatorial radius of
