@@ -7,15 +7,15 @@ $point2 = [ 'type' => 'Point', 'coordinates' => [ 3.2200, 55.9500 ] ];
    
 var_dump(fraction_along_gc_line($point1, $point2, 0.5));
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   ["type"]=>
   string(5) "Point"
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(1.5809481271999)
+    float(1.580948127199%s)
     [1]=>
-    float(53.743611334154)
+    float(53.74361133415%s)
   }
 }

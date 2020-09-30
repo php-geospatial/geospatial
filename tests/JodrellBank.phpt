@@ -12,15 +12,15 @@ $polar = transform_datum($from, GEO_WGS84, GEO_AIRY_1830);
 
 var_dump($polar);
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   ["type"]=>
   string(5) "Point"
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(-2.3057171628534)
+    float(-2.305717162853%s)
     [1]=>
-    float(53.235974015543)
+    float(53.23597401554%s)
   }
 }

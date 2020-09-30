@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5/7                                                      |
+  | PHP Version 5/7/8                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2020 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,11 @@
 #include "geohash.h"
 #include "Zend/zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
+
+#ifndef TSRMLS_CC
+#define TSRMLS_CC
+#define TSRMLS_DC
+#endif
 
 /**
  *  The WGS84 elipsoid semi major axes
@@ -492,7 +497,7 @@ geo_cartesian polar_to_cartesian(double latitude, double longitude, geo_ellipsoi
 geo_lat_long cartesian_to_polar(double x, double y, double z, geo_ellipsoid eli)
 {
 
-	double nu, lambda, h;
+	double nu = 0, lambda, h;
 	geo_lat_long polar;
 
 	/* aiming for 1m accuracy */

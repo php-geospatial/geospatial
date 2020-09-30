@@ -14,5 +14,5 @@ $to = array(
 );
 var_dump(initial_bearing($from, $to));
 ?>
---EXPECT--
-float(148.270892801715)
+--EXPECTF--
+float(148.27089280171%s)
