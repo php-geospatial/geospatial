@@ -1,7 +1,5 @@
 --TEST--
 initial_bearing() function - basic test for initial_bearing forumla
---INI--
-precision=15
 --FILE--
 <?php
 $from = array(
@@ -14,5 +12,5 @@ $to = array(
 );
 var_dump(initial_bearing($from, $to));
 ?>
---EXPECT--
-float(337.890440190492)
+--EXPECTF--
+float(337.8904401904%d)

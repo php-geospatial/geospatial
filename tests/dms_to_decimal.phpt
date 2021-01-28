@@ -16,10 +16,10 @@ var_dump($decimal);
 $decimal = dms_to_decimal(74, 34, 31, 'W');
 var_dump($decimal);
 ?>
---EXPECT--
-float(-1.0342916666667)
-float(-2.3071388888889)
-float(-2.3071388888889)
-float(-2.3071388888889)
-float(-0.1025)
-float(-74.575277777778)
+--EXPECTF--
+float(-1.034291666666%d)
+float(-2.307138888888%d)
+float(-2.307138888888%d)
+float(-2.307138888888%d)
+float(-0.102%d)
+float(-74.57527777777%d)

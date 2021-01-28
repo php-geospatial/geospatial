@@ -122,9 +122,8 @@ ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 4)
 	ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(transform_datum_args, 0, 0, 4)
-	ZEND_ARG_INFO(0, latitude)
-	ZEND_ARG_INFO(0, longitude)
+ZEND_BEGIN_ARG_INFO_EX(transform_datum_args, 0, 0, 3)
+	ZEND_ARG_INFO(0, GeoJSONPoint)
 	ZEND_ARG_INFO(0, from_reference_ellipsoid)
 	ZEND_ARG_INFO(0, to_reference_ellipsoid)
 ZEND_END_ARG_INFO()
@@ -156,9 +155,8 @@ ZEND_BEGIN_ARG_INFO_EX(interpolate_polygon_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, epsilon)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(geohash_encode_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, latitude)
-	ZEND_ARG_INFO(0, longitude)
+ZEND_BEGIN_ARG_INFO_EX(geohash_encode_args, 0, 0, 2)
+	ZEND_ARG_INFO(0, GeoJSONPoint)
 	ZEND_ARG_INFO(0, precision)
 ZEND_END_ARG_INFO()
 
@@ -275,7 +273,7 @@ void retval_point_from_coordinates(zval *return_value, double lon, double lat)
 #endif
 }
 
-static int parse_point_pair(zval *coordinates, double *lon, double *lat TSRMLS_DC)
+static int parse_point_pair(zval *coordinates, double *lon, double *lat)
 {
 	HashTable *coords;
 #if PHP_VERSION_ID >= 70000
@@ -285,7 +283,7 @@ static int parse_point_pair(zval *coordinates, double *lon, double *lat TSRMLS_D
 #endif
 
 	if (Z_TYPE_P(coordinates) != IS_ARRAY) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "Expected a coordinate pair as an array, but %s given", zend_zval_type_name(coordinates));
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Expected a coordinate pair as an array, but %s given", zend_zval_type_name(coordinates));
 		return 0;
 	}
 
@@ -319,7 +317,7 @@ static int parse_point_pair(zval *coordinates, double *lon, double *lat TSRMLS_D
 	return 1;
 }
 
-int geojson_point_to_lon_lat(zval *point, double *lon, double *lat TSRMLS_DC)
+int geojson_point_to_lon_lat(zval *point, double *lon, double *lat)
 {
 #if PHP_VERSION_ID >= 70000
 	zval *type, *coordinates;
@@ -336,7 +334,7 @@ int geojson_point_to_lon_lat(zval *point, double *lon, double *lat TSRMLS_DC)
 	if (Z_TYPE_P(coordinates) != IS_ARRAY) {
 		return 0;
 	}
-	return parse_point_pair(coordinates, lon, lat TSRMLS_CC);
+	return parse_point_pair(coordinates, lon, lat);
 #else
 	zval **type, **coordinates;
 
@@ -352,7 +350,7 @@ int geojson_point_to_lon_lat(zval *point, double *lon, double *lat TSRMLS_DC)
 	if (Z_TYPE_PP(coordinates) != IS_ARRAY) {
 		return 0;
 	}
-	return parse_point_pair(*coordinates, lon, lat TSRMLS_CC);
+	return parse_point_pair(*coordinates, lon, lat);
 #endif
 }
 
@@ -398,7 +396,7 @@ double php_geo_vincenty(double from_lat, double from_long, double to_lat, double
 	double cosof2sigma, A, B, C, uSq, deltaSigma, s;
 	int loopLimit = 100;
 	double precision = 0.000000000001;
-	
+
 	U1 = atan((1.0 - eli.f) * tan(from_lat));
 	U2 = atan((1.0 - eli.f) * tan(to_lat));
 	L = to_long - from_long;
@@ -410,7 +408,7 @@ double php_geo_vincenty(double from_lat, double from_long, double to_lat, double
 	do {
 		sinLambda = sin(lambda);
 		cosLambda = cos(lambda);
-		sinSigma = sqrt((cosU2*sinLambda) * (cosU2*sinLambda) + 
+		sinSigma = sqrt((cosU2*sinLambda) * (cosU2*sinLambda) +
 			(cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
 		cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
 		sigma = atan2(sinSigma, cosSigma);
@@ -530,7 +528,7 @@ PHP_FUNCTION(dms_to_decimal)
 	int direction_len;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|s", &degrees, &minutes, &seconds, &direction, &direction_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ddd|s", &degrees, &minutes, &seconds, &direction, &direction_len) == FAILURE) {
 		return;
 	}
 
@@ -560,7 +558,7 @@ PHP_FUNCTION(decimal_to_dms)
 	int coordinate_len;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ds", &decimal, &coordinate, &coordinate_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ds", &decimal, &coordinate, &coordinate_len) == FAILURE) {
 		return;
 	}
 
@@ -591,7 +589,7 @@ PHP_FUNCTION(helmert)
 	long from_reference_ellipsoid = 0, to_reference_ellipsoid = 0;
 	geo_helmert_constants helmert_constants;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ddd|ll", &x, &y, &z, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
 		return;
 	}
 
@@ -612,7 +610,7 @@ PHP_FUNCTION(polar_to_cartesian)
 	long reference_ellipsoid;
 	geo_cartesian point;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd|l", &latitude, &longitude, &reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd|l", &latitude, &longitude, &reference_ellipsoid) == FAILURE) {
 		return;
 	}
 
@@ -633,7 +631,7 @@ PHP_FUNCTION(cartesian_to_polar)
 	long reference_ellipsoid;
 	geo_lat_long polar;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ddd|l", &x, &y, &z, &reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ddd|l", &x, &y, &z, &reference_ellipsoid) == FAILURE) {
 		return;
 	}
 
@@ -658,11 +656,11 @@ PHP_FUNCTION(transform_datum)
 	geo_lat_long polar;
 	geo_helmert_constants helmert_constants;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "all", &geojson, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "all", &geojson, &from_reference_ellipsoid, &to_reference_ellipsoid) == FAILURE) {
 		return;
 	}
 
-	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude TSRMLS_CC)) {
+	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude)) {
 		RETURN_FALSE;
 	}
 
@@ -690,12 +688,12 @@ PHP_FUNCTION(haversine)
 	zval   *from_geojson, *to_geojson;
 	double from_lat, from_long, to_lat, to_long;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa|d", &from_geojson, &to_geojson, &radius) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aa|d", &from_geojson, &to_geojson, &radius) == FAILURE) {
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
 
 	RETURN_DOUBLE(php_geo_haversine(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD) * radius);
 }
@@ -709,12 +707,12 @@ PHP_FUNCTION(vincenty)
 	double from_lat, from_long, to_lat, to_long;
 	long reference_ellipsoid = GEO_WGS84;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa|l", &from_geojson, &to_geojson, &reference_ellipsoid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aa|l", &from_geojson, &to_geojson, &reference_ellipsoid) == FAILURE) {
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
 
 	geo_ellipsoid eli = get_ellipsoid(reference_ellipsoid);
 	RETURN_DOUBLE(php_geo_vincenty(from_lat * GEO_DEG_TO_RAD, from_long * GEO_DEG_TO_RAD, to_lat * GEO_DEG_TO_RAD, to_long * GEO_DEG_TO_RAD, eli));
@@ -747,12 +745,12 @@ PHP_FUNCTION(fraction_along_gc_line)
 	double from_lat, from_long, to_lat, to_long, fraction;
 	double res_lat, res_long;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aad", &from_geojson, &to_geojson, &fraction) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aad", &from_geojson, &to_geojson, &fraction) == FAILURE) {
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
 
 	php_geo_fraction_along_gc_line(
 		from_lat * GEO_DEG_TO_RAD,
@@ -795,12 +793,12 @@ PHP_FUNCTION(initial_bearing)
 	zval   *from_geojson, *to_geojson;
 	double from_lat, from_long, to_lat, to_long, bearing;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &from_geojson, &to_geojson) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aa", &from_geojson, &to_geojson) == FAILURE) {
 		return;
 	}
 
-	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat TSRMLS_CC);
-	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat TSRMLS_CC);
+	geojson_point_to_lon_lat(from_geojson, &from_long, &from_lat);
+	geojson_point_to_lon_lat(to_geojson, &to_long, &to_lat);
 
 	bearing = php_initial_bearing(
 		from_lat * GEO_DEG_TO_RAD,
@@ -813,7 +811,7 @@ PHP_FUNCTION(initial_bearing)
 }
 /* }}} */
 
-geo_array *geo_hashtable_to_array(zval *array TSRMLS_DC)
+geo_array *geo_hashtable_to_array(zval *array)
 {
 	geo_array *tmp;
 	int element_count;
@@ -832,12 +830,12 @@ geo_array *geo_hashtable_to_array(zval *array TSRMLS_DC)
 #if PHP_VERSION_ID >= 70000
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
 
-		if (!parse_point_pair(entry, &lon, &lat TSRMLS_CC)) {
+		if (!parse_point_pair(entry, &lon, &lat)) {
 #else
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
 
-		if (!parse_point_pair(*entry, &lon, &lat TSRMLS_CC)) {
+		if (!parse_point_pair(*entry, &lon, &lat)) {
 #endif
 
 			goto failure;
@@ -862,7 +860,7 @@ failure:
 	return NULL;
 }
 
-int geojson_linestring_to_array(zval *line, geo_array **array TSRMLS_DC)
+int geojson_linestring_to_array(zval *line, geo_array **array)
 {
 	geo_array *tmp;
 #if PHP_VERSION_ID >= 70000
@@ -885,7 +883,7 @@ int geojson_linestring_to_array(zval *line, geo_array **array TSRMLS_DC)
 		return 0;
 	}
 
-	tmp = geo_hashtable_to_array(coordinates TSRMLS_CC);
+	tmp = geo_hashtable_to_array(coordinates);
 #else
 	zval **type, **coordinates;
 
@@ -906,7 +904,7 @@ int geojson_linestring_to_array(zval *line, geo_array **array TSRMLS_DC)
 		return 0;
 	}
 
-	tmp = geo_hashtable_to_array(*coordinates TSRMLS_CC);
+	tmp = geo_hashtable_to_array(*coordinates);
 #endif
 	if (tmp && array) {
 		*array = tmp;
@@ -980,7 +978,7 @@ PHP_FUNCTION(rdp_simplify)
 	int        i;
 	zval      *pair;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd", &points_array, &epsilon) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zd", &points_array, &epsilon) == FAILURE) {
 		return;
 	}
 
@@ -990,7 +988,7 @@ PHP_FUNCTION(rdp_simplify)
 
 	array_init(return_value);
 
-	points = geo_hashtable_to_array(points_array TSRMLS_CC);
+	points = geo_hashtable_to_array(points_array);
 	if (!points) {
 		return;
 	}
@@ -1057,11 +1055,11 @@ PHP_FUNCTION(interpolate_linestring)
 	zval      *pair;
 	geo_array *new_array;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd", &line, &epsilon) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zd", &line, &epsilon) == FAILURE) {
 		return;
 	}
 
-	if (!geojson_linestring_to_array(line, &points TSRMLS_CC)) {
+	if (!geojson_linestring_to_array(line, &points)) {
 		RETURN_FALSE;
 	}
 
@@ -1097,7 +1095,7 @@ PHP_FUNCTION(interpolate_polygon)
 	int        i;
 	zval      *pair;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zd", &polygon, &epsilon) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zd", &polygon, &epsilon) == FAILURE) {
 		return;
 	}
 
@@ -1105,7 +1103,7 @@ PHP_FUNCTION(interpolate_polygon)
 		return;
 	}
 
-	if (!geojson_linestring_to_array(polygon, &points TSRMLS_CC)) {
+	if (!geojson_linestring_to_array(polygon, &points)) {
 		RETURN_FALSE;
 	}
 
@@ -1144,11 +1142,11 @@ PHP_FUNCTION(geohash_encode)
 	zval      *geojson;
 	char      *hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al", &geojson, &precision) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "al", &geojson, &precision) == FAILURE) {
 		return;
 	}
 
-	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude TSRMLS_CC)) {
+	if (!geojson_point_to_lon_lat(geojson, &longitude, &latitude)) {
 		RETURN_FALSE;
 	}
 
@@ -1172,7 +1170,7 @@ PHP_FUNCTION(geohash_decode)
 	int     hash_len;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &hash, &hash_len) == FAILURE) {
 		return;
 	}
 

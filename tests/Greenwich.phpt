@@ -25,16 +25,16 @@ var_dump($polar);
 echo round($diferenceWGS84, 8),PHP_EOL;
 echo round($diferenceAiry, 8),PHP_EOL;
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   ["type"]=>
   string(5) "Point"
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(0.00013627354767069)
+    float(0.000136273547670%d)
     [1]=>
-    float(51.477400823311)
+    float(51.47740082331%d)
   }
 }
 102.84185171

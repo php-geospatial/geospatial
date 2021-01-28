@@ -12,7 +12,7 @@ var_dump(fraction_along_gc_line($point1, $point2, 0.6));
 var_dump(fraction_along_gc_line($point1, $point2, 0.8));
 var_dump(fraction_along_gc_line($point1, $point2, 1));
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   ["type"]=>
   string(5) "Point"
@@ -30,9 +30,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(6.9998522347268)
+    float(6.999852234726%d)
     [1]=>
-    float(10.023944943799)
+    float(10.02394494379%d)
   }
 }
 array(2) {
@@ -41,9 +41,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(8.9999260791276)
+    float(8.999926079127%d)
     [1]=>
-    float(10.035925156339)
+    float(10.03592515633%d)
   }
 }
 array(2) {
@@ -52,9 +52,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(11.000073920872)
+    float(11.00007392087%d)
     [1]=>
-    float(10.035925156339)
+    float(10.03592515633%d)
   }
 }
 array(2) {
@@ -63,9 +63,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(13.000147765273)
+    float(13.00014776527%d)
     [1]=>
-    float(10.023944943799)
+    float(10.02394494379%d)
   }
 }
 array(2) {
@@ -74,7 +74,7 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(15)
+    float(%r(15|14.9999)%r%S)
     [1]=>
     float(10)
   }

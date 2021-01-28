@@ -25,7 +25,7 @@ var_dump(geohash_decode('u2edjnw17enr'));
 
 var_dump(geohash_decode('zzzzzzzzzzzz'));
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   ["type"]=>
   string(5) "Point"
@@ -87,9 +87,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.02966308594)
+    float(171.0296630859%d)
     [1]=>
-    float(49.671936035156)
+    float(49.67193603515%d)
   }
 }
 array(2) {
@@ -98,9 +98,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.02897644043)
+    float(171.0289764404%d)
     [1]=>
-    float(49.67399597168)
+    float(49.6739959716%d)
   }
 }
 array(2) {
@@ -109,9 +109,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.0284614563)
+    float(171.028461456%d)
     [1]=>
-    float(49.674081802368)
+    float(49.67408180236%d)
   }
 }
 array(2) {
@@ -120,9 +120,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.02861166)
+    float(171.0286116%d)
     [1]=>
-    float(49.674146175385)
+    float(49.67414617538%d)
   }
 }
 array(2) {
@@ -131,9 +131,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.02859556675)
+    float(171.0285955667%d)
     [1]=>
-    float(49.674154222012)
+    float(49.67415422201%d)
   }
 }
 array(2) {
@@ -142,9 +142,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.0285962373)
+    float(171.028596237%d)
     [1]=>
-    float(49.674153551459)
+    float(49.67415355145%d)
   }
 }
 array(2) {
@@ -153,9 +153,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(171.02859674022)
+    float(171.0285967402%d)
     [1]=>
-    float(49.674154138193)
+    float(49.67415413819%d)
   }
 }
 array(2) {
@@ -186,9 +186,9 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(16.40000006184)
+    float(16.4000000618%d)
     [1]=>
-    float(48.199999993667)
+    float(48.1999999936%d)
   }
 }
 array(2) {
@@ -197,8 +197,8 @@ array(2) {
   ["coordinates"]=>
   array(2) {
     [0]=>
-    float(179.99999983236)
+    float(179.9999998323%d)
     [1]=>
-    float(89.999999916181)
+    float(89.9999999161%d)
   }
 }
