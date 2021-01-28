@@ -1,0 +1,48 @@
+name: Build
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+    release:
+        types: [created]
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+        name: Build and test
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [7.0, 7.1, 7.2, 7.3, 7.4, 8.0, 8.1]
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+                    ini-values: "session.save_path=/tmp"
+                    extensions: json
+                    tools: pecl
+
+            -   name: Compile
+                run: ./.github/workflows/compile.sh
+
+            -   name: Run tests
+                run: |
+                    php -m
+                    php --rf "json_decode"
+                    export TEST_PHP_EXECUTABLE=`which php`
+                    php run-tests.php -d extension=`pwd`/modules/geospatial.so && if ls tests/*.diff >/dev/null 2>&1; then echo "Tests failed" && cat tests/*.diff && exit 1; fi
+
+            -   name: Show errors
+                if: ${{ failure() }}
+                run: ./.github/workflows/show-errors.sh
+
+            -   name: Do GCOV
+                run: |
+                    gcov --object-directory .libs *.c
+                    bash <(curl -s https://codecov.io/bash)
