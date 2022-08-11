@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5/7                                                      |
+  | PHP                                                                  |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2022 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -109,13 +109,13 @@ ZEND_BEGIN_ARG_INFO_EX(helmert_args, 0, 0, 3)
 	ZEND_ARG_INFO(0, to_reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(polar_to_cartesian_args, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(polar_to_cartesian_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, latitude)
 	ZEND_ARG_INFO(0, longitude)
 	ZEND_ARG_INFO(0, reference_ellipsoid)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 3)
 	ZEND_ARG_INFO(0, x)
 	ZEND_ARG_INFO(0, y)
 	ZEND_ARG_INFO(0, z)
