@@ -50,6 +50,7 @@
    <file name="geo_array.h" role="src" />
    <file name="geo_lat_long.h" role="src" />
    <file name="geohash.h" role="src" />
+   <file name="php_geospatial_arginfo.h" role="src" />
    <file name="php_geospatial.h" role="src" />
    <file name="geo_array.c" role="src" />
    <file name="geohash.c" role="src" />
@@ -59,7 +60,7 @@
  <dependencies>
   <required>
    <php>
-    <min>7.0.0</min>
+    <min>8.0.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>

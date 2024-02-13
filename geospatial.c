@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP                                                                  |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2022 The PHP Group                                |
+  | Copyright (c) 1997-2024 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,10 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+
 #include "php_geospatial.h"
+#include "php_geospatial_arginfo.h"
+
 #include "geo_array.h"
 #include "geo_lat_long.h"
 #include "geohash.h"
@@ -76,119 +79,6 @@ const geo_helmert_constants osgb36_wgs84 = {
   0.8421
 };
 
-ZEND_BEGIN_ARG_INFO_EX(haversine_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, geoJsonPointFrom)
-	ZEND_ARG_INFO(0, geoJsonPointTo)
-	ZEND_ARG_INFO(0, radius)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(vincenty_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, geoJsonPointFrom)
-	ZEND_ARG_INFO(0, geoJsonPointTo)
-	ZEND_ARG_INFO(0, reference_ellipsoid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(fraction_along_gc_line_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, geoJsonPointFrom)
-	ZEND_ARG_INFO(0, geoJsonPointTo)
-	ZEND_ARG_INFO(0, fraction)
-	ZEND_ARG_INFO(0, radius)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(initial_bearing_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, geoJsonPointFrom)
-	ZEND_ARG_INFO(0, geoJsonPointTo)
-	ZEND_ARG_INFO(0, radius)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(helmert_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
-	ZEND_ARG_INFO(0, z)
-	ZEND_ARG_INFO(0, from_reference_ellipsoid)
-	ZEND_ARG_INFO(0, to_reference_ellipsoid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(polar_to_cartesian_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, latitude)
-	ZEND_ARG_INFO(0, longitude)
-	ZEND_ARG_INFO(0, reference_ellipsoid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(cartesian_to_polar_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, x)
-	ZEND_ARG_INFO(0, y)
-	ZEND_ARG_INFO(0, z)
-	ZEND_ARG_INFO(0, reference_ellipsoid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(transform_datum_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, GeoJSONPoint)
-	ZEND_ARG_INFO(0, from_reference_ellipsoid)
-	ZEND_ARG_INFO(0, to_reference_ellipsoid)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(dms_to_decimal_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, degrees)
-	ZEND_ARG_INFO(0, minutes)
-	ZEND_ARG_INFO(0, seconds)
-	ZEND_ARG_INFO(0, direction)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(decimal_to_dms_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, decimal)
-	ZEND_ARG_INFO(0, coordinate)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(rdp_simplify_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, pointsArray)
-	ZEND_ARG_INFO(0, epsilon)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(interpolate_linestring_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, GeoJSONLineString)
-	ZEND_ARG_INFO(0, epsilon)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(interpolate_polygon_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, GeoJSONPolygon)
-	ZEND_ARG_INFO(0, epsilon)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(geohash_encode_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, GeoJSONPoint)
-	ZEND_ARG_INFO(0, precision)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(geohash_decode_args, 0, 0, 1)
-	ZEND_ARG_INFO(0, geohash)
-ZEND_END_ARG_INFO()
-
-/* {{{ geospatial_functions[]
- *
- * Every user visible function must have an entry in geospatial_functions[].
- */
-const zend_function_entry geospatial_functions[] = {
-	PHP_FE(haversine, haversine_args)
-	PHP_FE(initial_bearing, initial_bearing_args)
-	PHP_FE(fraction_along_gc_line, fraction_along_gc_line_args)
-	PHP_FE(helmert, helmert_args)
-	PHP_FE(polar_to_cartesian, polar_to_cartesian_args)
-	PHP_FE(cartesian_to_polar, cartesian_to_polar_args)
-	PHP_FE(transform_datum, transform_datum_args)
-	PHP_FE(dms_to_decimal, dms_to_decimal_args)
-	PHP_FE(decimal_to_dms, decimal_to_dms_args)
-	PHP_FE(vincenty, vincenty_args)
-	PHP_FE(rdp_simplify, rdp_simplify_args)
-	PHP_FE(interpolate_linestring, interpolate_linestring_args)
-	PHP_FE(interpolate_polygon, interpolate_polygon_args)
-	PHP_FE(geohash_encode, geohash_encode_args)
-	PHP_FE(geohash_decode, geohash_decode_args)
-	/* End of functions */
-	{ NULL, NULL, NULL }
-};
-/* }}} */
-
 /* {{{ geospatial_module_entry
  */
 zend_module_entry geospatial_module_entry = {
@@ -196,7 +86,7 @@ zend_module_entry geospatial_module_entry = {
 	STANDARD_MODULE_HEADER,
 #endif
 	"geospatial",
-	geospatial_functions,
+	ext_functions,
 	PHP_MINIT(geospatial),
 	NULL,
 	NULL,
@@ -607,7 +497,7 @@ PHP_FUNCTION(helmert)
 PHP_FUNCTION(polar_to_cartesian)
 {
 	double latitude, longitude;
-	long reference_ellipsoid;
+	long reference_ellipsoid = 0;
 	geo_cartesian point;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "dd|l", &latitude, &longitude, &reference_ellipsoid) == FAILURE) {
@@ -628,7 +518,7 @@ PHP_FUNCTION(polar_to_cartesian)
 PHP_FUNCTION(cartesian_to_polar)
 {
 	double x, y, z;
-	long reference_ellipsoid;
+	long reference_ellipsoid = 0;
 	geo_lat_long polar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ddd|l", &x, &y, &z, &reference_ellipsoid) == FAILURE) {
