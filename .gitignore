@@ -14,6 +14,7 @@
 /config.nice
 /config.sub
 /configure
+/configure.ac
 /configure.in
 /config.status
 /config.cache
@@ -56,3 +57,6 @@ tests/*.log
 tests/*.out
 tests/*.php
 tests/*.sh
+/*~
+*.dep
+geospatial_arginfo.h
