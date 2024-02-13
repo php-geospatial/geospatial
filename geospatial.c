@@ -978,13 +978,10 @@ PHP_FUNCTION(rdp_simplify)
 	int        i;
 	zval      *pair;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zd", &points_array, &epsilon) == FAILURE) {
-		return;
-	}
-
-	if (Z_TYPE_P(points_array) != IS_ARRAY) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(points_array)
+		Z_PARAM_DOUBLE(epsilon)
+	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(return_value);
 
