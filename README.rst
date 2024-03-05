@@ -189,6 +189,33 @@ you would use::
 
 	var_dump(fraction_along_gc_line($point1, $point2, 0.25));
 
+Interpolating a GeoJSONLineString
+---------------------------------
+
+The ``interpolate_linestring`` functions takes a GeoJSONLineString. If the
+Pythagorean distance in degrees between two points in the line than the
+``epsilon`` value, it inserts a new point every ``epsilon / distance``
+fraction of the Great Circle Line.
+
+Given the Linestring::
+
+	$lineString = [
+		'type' => 'Linestring',
+		'coordinates' => [
+			[  5,  10 ],
+			[ 15,  10 ],
+			[  0, -50 ],
+		]
+	];
+
+The following will return an array with 26 elements::
+
+	var_dump(interpolate_linestring($lineString, 3));
+
+Five for the first pair, at fractions ``0.0``, ``0.3``, ``0.6``, ``0.9`` and
+``1.0``, and then two times, each another ``0.0485`` fraction along the Great
+Circle Line for the second pair.
+
 Geohashing
 ----------
 

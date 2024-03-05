@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 52022e47a6841ea20db60c2c92eba319cfc6c563 */
+ * Stub hash: 0fadd3390095e7624d9586206523e5352d345729 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dms_to_decimal, 0, 3, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, degrees, IS_DOUBLE, 0)
@@ -58,6 +58,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fraction_along_gc_line, 0, 3, IS
 	ZEND_ARG_TYPE_INFO(0, fraction, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_interpolate_linestring, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, line, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, epsilon, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_initial_bearing, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, from, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, to, IS_ARRAY, 0)
@@ -65,11 +70,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rdp_simplify, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, points, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, epsilon, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_interpolate_linestring, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, line, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, epsilon, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
@@ -92,9 +92,9 @@ ZEND_FUNCTION(transform_datum);
 ZEND_FUNCTION(haversine);
 ZEND_FUNCTION(vincenty);
 ZEND_FUNCTION(fraction_along_gc_line);
+ZEND_FUNCTION(interpolate_linestring);
 ZEND_FUNCTION(initial_bearing);
 ZEND_FUNCTION(rdp_simplify);
-ZEND_FUNCTION(interpolate_linestring);
 ZEND_FUNCTION(geohash_encode);
 ZEND_FUNCTION(geohash_decode);
 
@@ -109,9 +109,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(haversine, arginfo_haversine)
 	ZEND_FE(vincenty, arginfo_vincenty)
 	ZEND_FE(fraction_along_gc_line, arginfo_fraction_along_gc_line)
+	ZEND_FE(interpolate_linestring, arginfo_interpolate_linestring)
 	ZEND_FE(initial_bearing, arginfo_initial_bearing)
 	ZEND_FE(rdp_simplify, arginfo_rdp_simplify)
-	ZEND_FE(interpolate_linestring, arginfo_interpolate_linestring)
 	ZEND_FE(geohash_encode, arginfo_geohash_encode)
 	ZEND_FE(geohash_decode, arginfo_geohash_decode)
 	ZEND_FE_END
