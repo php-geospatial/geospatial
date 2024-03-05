@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e128dccdbd9aa407d95c5b62e8000cb12d0bffa3 */
+ * Stub hash: 52022e47a6841ea20db60c2c92eba319cfc6c563 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dms_to_decimal, 0, 3, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, degrees, IS_DOUBLE, 0)
@@ -73,11 +73,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_interpolate_linestring, 0, 2, IS
 	ZEND_ARG_TYPE_INFO(0, epsilon, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_interpolate_polygon, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, polygon, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, epsilon, IS_DOUBLE, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_geohash_encode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, point, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "12")
@@ -100,7 +95,6 @@ ZEND_FUNCTION(fraction_along_gc_line);
 ZEND_FUNCTION(initial_bearing);
 ZEND_FUNCTION(rdp_simplify);
 ZEND_FUNCTION(interpolate_linestring);
-ZEND_FUNCTION(interpolate_polygon);
 ZEND_FUNCTION(geohash_encode);
 ZEND_FUNCTION(geohash_decode);
 
@@ -118,7 +112,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(initial_bearing, arginfo_initial_bearing)
 	ZEND_FE(rdp_simplify, arginfo_rdp_simplify)
 	ZEND_FE(interpolate_linestring, arginfo_interpolate_linestring)
-	ZEND_FE(interpolate_polygon, arginfo_interpolate_polygon)
 	ZEND_FE(geohash_encode, arginfo_geohash_encode)
 	ZEND_FE(geohash_decode, arginfo_geohash_decode)
 	ZEND_FE_END

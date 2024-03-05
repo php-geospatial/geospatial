@@ -43,7 +43,6 @@ function initial_bearing(array $from, array $to): float {}
 function rdp_simplify(array $points, float $epsilon): array {}
 
 function interpolate_linestring(array $line, float $epsilon): array {}
-function interpolate_polygon(array $polygon, float $epsilon): array {}
 
 function geohash_encode(array $point, int $precision = 12): string {}
 function geohash_decode(string $geohash): array {}

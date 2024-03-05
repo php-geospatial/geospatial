@@ -972,50 +972,6 @@ PHP_FUNCTION(interpolate_linestring)
 }
 /* }}} */
 
-/* {{{ proto array interpolate_polygon(GeoJSONPolygon polygon, float epsilon)
-   Interpolates polygons with intermediate points to show line segments as GC lines */
-PHP_FUNCTION(interpolate_polygon)
-{
-	zval      *polygon;
-	double     epsilon;
-	geo_array *points;
-	int        i;
-	zval      *pair;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zd", &polygon, &epsilon) == FAILURE) {
-		return;
-	}
-
-	if (Z_TYPE_P(polygon) != IS_ARRAY) {
-		return;
-	}
-
-	if (!geojson_linestring_to_array(polygon, &points)) {
-		RETURN_FALSE;
-	}
-
-	array_init(return_value);
-
-	rdp_simplify(points, epsilon, 0, points->count - 1);
-
-	for (i = 0; i < points->count; i++) {
-		if (points->status[i]) {
-			GEOSPAT_MAKE_STD_ZVAL(pair);
-			array_init(pair);
-			add_next_index_double(pair, points->x[i]);
-			add_next_index_double(pair, points->y[i]);
-			add_next_index_zval(return_value, pair);
-#if PHP_VERSION_ID >= 70000
-			efree(pair);
-#endif
-		}
-	}
-
-	geo_array_dtor(points);
-}
-/* }}} */
-
-
 /* {{{ string geohash_encode(GeoJSONPoint $point [, int $precision = 12])
  */
 PHP_FUNCTION(geohash_encode)
