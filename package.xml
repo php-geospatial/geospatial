@@ -52,9 +52,11 @@
    <file name="geohash.h" role="src" />
    <file name="php_geospatial_arginfo.h" role="src" />
    <file name="php_geospatial.h" role="src" />
+   <file name="rdp.h" role="src" />
    <file name="geo_array.c" role="src" />
    <file name="geohash.c" role="src" />
    <file name="geospatial.c" role="src" />
+   <file name="rdp.c" role="src" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
