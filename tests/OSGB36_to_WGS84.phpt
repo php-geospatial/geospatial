@@ -20,7 +20,7 @@ array(4) {
   ["minutes"]=>
   int(14)
   ["seconds"]=>
-  float(11.49337267273%d)
+  float(11.4933726727%d)
   ["direction"]=>
   string(1) "N"
 }
