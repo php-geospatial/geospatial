@@ -5,8 +5,5 @@
     "description": "PHP Extension to handle common geospatial functions.",
     "require": {
         "php": ">= 8.0.0"
-    },
-    "php-ext": {
-        "extension-name": "geospatial"
     }
 }
