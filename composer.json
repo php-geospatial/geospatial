@@ -1,0 +1,9 @@
+{
+    "name": "php-geospatial/geospatial",
+    "type": "php-ext",
+    "license": "PHP-3.01",
+    "description": "PHP Extension to handle common geospatial functions.",
+    "require": {
+        "php": ">= 8.0.0"
+    }
+}
