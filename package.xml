@@ -27,11 +27,11 @@
   <active>yes</active>
  </lead>
 
- <date>2025-06-19</date>
- <time>13:31:02</time>
+ <date>2025-07-01</date>
+ <time>12:02:10</time>
  <version>
-  <release>0.3.3</release>
-  <api>0.3.3</api>
+  <release>0.3.4</release>
+  <api>0.3.4</api>
  </version>
  <stability>
   <release>beta</release>
@@ -39,9 +39,8 @@
  </stability>
  <license uri="http://www.php.net/license">PHP 3.01</license>
  <notes>
-- Drop support for PHP 7
-- Added support for PIE
-- Convert extension to use stubs files
+- Fixed compilation on Windows (Jean-Baptiste Nahan)
+- Fixed tests on aarch64 (Remi Collet)
  </notes>
 
  <contents>
