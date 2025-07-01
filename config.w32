@@ -4,6 +4,6 @@
 ARG_ENABLE("geospatial", "enable geospatial support", "no");
 
 if (PHP_GEOSPATIAL != "no") {
-	EXTENSION("geospatial", "geospatial.c geo_array.c geohash.c");
+	EXTENSION("geospatial", "geospatial.c geo_array.c geohash.c rdp.c");
 }
 
